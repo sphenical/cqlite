@@ -156,11 +156,12 @@ activated with `-DCMAKE_BUILD_TYPE=Debug`.
 
 #### Pre-requisites
 
-The tests use the [`googletest`](https://github.com/google/googletest) library. If it
-is not available on the system or is on non-default locations (e.g. on Windows) its
-location can be provided by specifying a prefix path for cmake with
+The tests use the [`googletest`](https://github.com/google/googletest) library. If it is
+built from sources or is otherwise installed on non-default locations (e.g. on Windows)
+its location can be provided by specifying a prefix path for cmake with
 `-DCMAKE_PREFIX_PATH='C:\Program Files\googletest-distribution;C:\sqlite3'` for example in
-order to specify the `googletest` and the `sqlite3` locations.
+order to specify where the libraries and include files for `googletest` and `sqlite3` can
+be found.
 
 ##### Windows
 
