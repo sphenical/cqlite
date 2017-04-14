@@ -98,7 +98,7 @@ Windows (msys git shell or MS Visual terminal):
 ```sh
 $ mkdir build
 $ cd build
-$ cmake -DCMAKE_BUILD_TYPE=Release ..
+$ cmake -G"Visual Studio 14 2015 Win64" ..
 $ cmake --build . --config Release --target package
 ```
 The library can then be installed from the generated installer.
