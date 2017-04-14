@@ -101,7 +101,9 @@ $ cd build
 $ cmake -G"Visual Studio 14 2015 Win64" ..
 $ cmake --build . --config Release --target package
 ```
-The library can then be installed from the generated installer.
+The library can then be installed from the generated installer - for this to work, the
+NSIS installer and the corresponding Microsoft Visual Studio edition needs to be
+installed on the build system.
 
 ### As a sub-project (using the static library build)
 
