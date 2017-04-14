@@ -70,12 +70,28 @@ namespace cqlite {
             Statement prepare (const std::string&);
             Database& operator<< (const std::string&);
 
-
+            /*!
+             * @brief Adds an update hook callback that gets called on every update/insert/delete.
+             *
+             * The callback has the following signature:
+             * void (Operation op, const std::string& db, const std::string& table, std::int64_t row);
+             *
+             * op: Insert, Delete, or Update
+             * db: the name of the affected database
+             * table: the name of the affected table
+             * row: the rowid of the affected row
+             *
+             * Any previously set callback will silently be dropped, resp. overridden.
+             *
+             * @tparam Hook the type of the hook callback (in non-windows-dll version only)
+             * @param hook the callback
+             * @return this database
+             */
 #ifdef      CQLITE_WINDLL_WORKAROUND
-            Database& setUpdateHook (const UpdateHook&);
+            Database& setUpdateHook (const UpdateHook& hook);
 #else
             template <typename Hook>
-                Database& setUpdateHook (Hook&&);
+                Database& setUpdateHook (Hook&& hook);
 #endif
 
             std::int64_t lastInsertId () const;
@@ -93,23 +109,6 @@ namespace cqlite {
     };
 
 #ifndef     CQLITE_WINDLL_WORKAROUND
-    /*!
-     * @brief Adds an update hook callback that gets called on every update/insert/delete.
-     *
-     * The callback has the following signature:
-     * void (Operation op, const std::string& db, const std::string& table, std::int64_t row);
-     *
-     * op: Insert, Delete, or Update
-     * db: the name of the affected database
-     * table: the name of the affected table
-     * row: the rowid of the affected row
-     *
-     * Any previously set callback will silently be dropped, resp. overridden.
-     *
-     * @tparam Hook the type of the hook callback
-     * @param hook the callback
-     * @return this database
-     */
     template <typename Hook>
         inline Database& Database::setUpdateHook (Hook&& hook)
         {
