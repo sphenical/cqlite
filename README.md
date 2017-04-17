@@ -1,4 +1,4 @@
-# cqlite - A very simplistic and incomplete but usable c++ SQLite wrapper
+# cqlite - C++ SQLite wrapper library
 
 ![Build Status](http://sphenic.ch:8080/buildStatus/icon?job=cqlite)
 
