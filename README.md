@@ -83,7 +83,7 @@ about resource management but they do not take care about concurrent access.
 The project uses `cmake` as a build tool and allows for different use case scenarios. For
 instance it is possible to install the library system wide as a shared library or it is
 possible to generate a static library and use this project as a sub-project within a
-parent project, for instance in a sub-folder called `thirdparty` or `vendor` or the like.
+parent project, for instance in a sub-folder called `thirdparty` or `vendor` or similar.
 
 ### As a system wide shared library (default)
 
@@ -135,15 +135,15 @@ shown in the following example:
 ```
 target_link_libraries (my_target cqlite)
 ```
-The library will then be statically linked to the application without the need to install
-any shared object or the like. This is suitable for an application that does not want to
-expose the need of the availability of this library on the target host system.
+The library will then be statically linked to the application and therefore does not
+depend on the installation of the corresponding shared object. This is suitable for an
+application that does not want to expose the dependency on this library on the target host
+system.
 
-Last but not least the include directories need to be extended in order to be able to
-include the `cqlite` header files and the generated header files that are created during
-the cmake configuration. This can be achieved by the following call to
-`include_directories` that is placed in the `CMakeLists.txt` where the application is
-configured:
+In that case the include directories need to be extended in order to be able to include
+the `cqlite` header files and the generated header files that are created during the cmake
+configuration. This can be achieved by the following call to `include_directories` that is
+placed in the `CMakeLists.txt` where the application is configured:
 
 ```
 include_directories (SYSTEM
@@ -187,3 +187,5 @@ Windows:
 ```
 $ cmake --build . --config Debug --target check
 ```
+<!-- vim: set tw=90, setlocal spell spelllang=en -->
+
