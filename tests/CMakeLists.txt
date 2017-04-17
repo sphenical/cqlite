@@ -71,7 +71,7 @@ endif ()
 ## Test
 #######
 add_test (NAME alltests
-    COMMAND runtests
+    COMMAND runtests --gtest_output=xml:${CMAKE_BINARY_DIR}/cqlite_testresults.xml
     WORKING_DIRECTORY $<TARGET_FILE_DIR:runtests>)
 
 add_test (NAME maintest
