@@ -186,6 +186,4 @@ $ make check
 Windows:
 ```
 $ cmake --build . --config Debug --target check
-```
-<!-- vim: set tw=90, setlocal spell spelllang=en -->
 
