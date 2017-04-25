@@ -29,6 +29,9 @@
 
 namespace cqlite {
 
+    /**
+     * In order to interpret a sqlite return value.
+     */
     class CQLITE_EXPORT Code
     {
         public:
@@ -36,6 +39,11 @@ namespace cqlite {
             static bool isError (int);
     };
 
+    /**
+     * Whether the given sqlite return value is an error.
+     * @param code the return value from the questioned sqlite3 function call
+     * @return true iff the given return value corresponds to a function call that failed
+     */
     inline bool Code::isError (int code)
     { return !isSuccess (code); }
 }

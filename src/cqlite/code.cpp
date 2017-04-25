@@ -28,6 +28,12 @@
 
 namespace cqlite {
 
+    /**
+     * Whether the given sqlite return value represents a successful value.
+     * @param code the return value from the questioned sqlite3 function call
+     * @return true iff the given return value corresponds to a function call that
+     * succeeded
+     */
     bool Code::isSuccess (int code)
     {
         bool success = false;

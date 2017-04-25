@@ -33,6 +33,13 @@
 
 namespace cqlite {
 
+    /**
+     * Creates a new result from the given sqlite3 statement.
+     * The given statement is not managed in any way, it must be assured
+     * that it is valid as long as this result is used.
+     * @param stmt the statement
+     * @throws Error if stmt is null
+     */
     Result::Result (sqlite3_stmt* stmt) :
         stmt_ {stmt},
         index_ {0},
@@ -43,6 +50,11 @@ namespace cqlite {
         }
     }
 
+    /**
+     * Returns the number of columns of data currently available.
+     * Sometimes the same as Result::columns and sometimes 0.
+     * @return the number of columns of data currently available
+     */
     std::size_t Result::dataColumns () const
     {
         std::size_t nrColumns = 0;
@@ -56,6 +68,10 @@ namespace cqlite {
         return nrColumns;
     }
 
+    /**
+     * Returns the number of columns in the result set returned by the prepared statement.
+     * @return the number of columns in the result set returned by the prepared statement
+     */
     std::size_t Result::columns () const
     {
         std::size_t count = 0;
@@ -69,6 +85,12 @@ namespace cqlite {
         return count;
     }
 
+    /**
+     * Advances the result to the next row if there are more rows.
+     * @return this result
+     * @throws QueryError if its not possible to advance even though the end of result
+     * rows has not yet been reached.
+     */
     Result& Result::operator++ ()
     {
         if (*this) {
@@ -90,6 +112,12 @@ namespace cqlite {
         return *this;
     }
 
+    /**
+     * Advances this result set and returns a copy of this.
+     * Note that logically a call this method does not make sense, the returned result
+     * refers to the same statement like this one, they interfere with each other.
+     * @return a copy of this result
+     */
     Result Result::operator++ (int)
     {
         Result copy {*this};
@@ -97,30 +125,50 @@ namespace cqlite {
         return copy;
     }
 
+    /**
+     * Extracts an integer from the next column.
+     * @return this result
+     */
     Result& Result::operator>> (int& value)
     {
         value = sqlite3_column_int (stmt_, index_++);
         return *this;
     }
 
+    /**
+     * Extracts a signed 64-bit integer from the next column.
+     * @return this result
+     */
     Result& Result::operator>> (std::int64_t& value)
     {
         value = sqlite3_column_int64 (stmt_, index_++);
         return *this;
     }
 
+    /**
+     * Extracts a std::size_t from the next column.
+     * @return this result
+     */
     Result& Result::operator>> (std::size_t& value)
     {
         value = static_cast<std::size_t> (sqlite3_column_int64 (stmt_, index_++));
         return *this;
     }
 
+    /**
+     * Extracts a double from the next column.
+     * @return this result
+     */
     Result& Result::operator>> (double& value)
     {
         value = sqlite3_column_double (stmt_, index_++);
         return *this;
     }
 
+    /**
+     * Extracts a string from the next column.
+     * @return this result
+     */
     Result& Result::operator>> (std::string& value)
     {
         const char* text = reinterpret_cast<const char*> (
@@ -136,11 +184,36 @@ namespace cqlite {
         return *this;
     }
 
+    /**
+     * Extracts a blob from the next column.
+     * @param data the blob to extract
+     * @see Result::operator>> (std::tuple<const void*&, std::size_t&> data)
+     * @return this result
+     */
     Result& Result::operator>> (std::pair<const void*, std::size_t>& data)
     {
-        data.first = sqlite3_column_blob (stmt_, index_);
+        return *this >> std::tie (data.first, data.second);
+    }
 
-        data.second = static_cast<std::size_t> (
+    /**
+     * Extracts a blob from the next column.
+     * The blob is represented as a tuple that contains the data and the size of the blob.
+     * E.g.
+     * @code
+
+     std::size_t length;
+     const void* blobData;
+
+     result >> std::tie (blobData, length);
+
+     @endcode
+     * @return this result
+     */
+    Result& Result::operator>> (std::tuple<const void*&, std::size_t&> data)
+    {
+        std::get<0> (data) = sqlite3_column_blob (stmt_, index_);
+
+        std::get<1> (data) = static_cast<std::size_t> (
                 sqlite3_column_bytes (stmt_, index_));
 
         ++index_;
@@ -148,11 +221,19 @@ namespace cqlite {
         return *this;
     }
 
+    /**
+     * Whether more rows are available.
+     * @return true if more rows are available
+     */
     Result::operator bool () const
     {
         return state_ == SQLITE_ROW;
     }
 
+    /**
+     * Returns the type of the next available column within this result set.
+     * @return the type of the next available column within this result set
+     */
     Result::Type Result::type () const
     {
         Type type = Type::Null;

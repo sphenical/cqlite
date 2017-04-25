@@ -29,6 +29,7 @@
 #include    <string>
 #include    <stdexcept>
 #include    <utility>
+#include    <tuple>
 
 #include    <cqlite/error.hpp>
 #include    <cqlite/cqlite_export.hpp>
@@ -43,6 +44,9 @@ namespace cqlite {
             using Error::Error;
     };
 
+    /**
+     * Represents a result from a sql operation.
+     */
     class CQLITE_EXPORT Result
     {
         public:
@@ -71,6 +75,7 @@ namespace cqlite {
             Result& operator>> (double&);
             Result& operator>> (std::string&);
             Result& operator>> (std::pair<const void*, std::size_t>&);
+            Result& operator>> (std::tuple<const void*&, std::size_t&>);
 
             operator bool () const;
             Type type () const;

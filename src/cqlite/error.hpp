@@ -5,6 +5,9 @@
 
 namespace cqlite {
 
+    /**
+     * The base class of all cqlite errors.
+     */
     class Error : public std::runtime_error
     {
         public:
