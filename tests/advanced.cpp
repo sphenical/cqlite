@@ -3,6 +3,10 @@
 
 #include    <functional>
 
+#include    <cstring>
+#include    <cstdint>
+#include    <tuple>
+
 using namespace cqlite;
 
 namespace {
@@ -57,4 +61,41 @@ TEST (advanced, hook) {
     insert (db);
 
     ASSERT_EQ (watch.lastId, 10);
+}
+
+TEST (advanced, blob) {
+    Database db {":memory:"};
+    db <<
+        "CREATE TABLE foo ("
+        "id INTEGER PRIMARY KEY, "
+        "data BLOB DEFAULT NULL)";
+
+    Statement insert = db.prepare (
+            "INSERT INTO foo (data) VALUES (?1)");
+
+    using DataType = std::uint16_t;
+    DataType data [] = {
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+    };
+    const std::size_t dataSize = sizeof data;
+    const std::size_t dataCount = dataSize / sizeof data [0];
+
+    insert << std::make_pair (data, dataSize);
+    insert.execute ();
+
+    Statement select = db.prepare ("SELECT data FROM foo");
+    Result result = select.execute ();
+
+    std::size_t size;
+    const void* resultData;
+
+    result >> std::tie (resultData, size);
+
+    ASSERT_EQ (size, dataSize);
+
+    auto resultPtr = reinterpret_cast<const DataType*> (resultData);
+
+    for (std::size_t i = 0; i < dataCount; ++i) {
+        ASSERT_EQ (i, resultPtr [i]);
+    }
 }

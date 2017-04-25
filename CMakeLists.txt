@@ -26,6 +26,7 @@ endif ()
 option (CQLITE_BUILD_SHARED_LIBS "Disable the build of the shared library." ON)
 option (CQLITE_BUILD_TESTS "Enable testing." OFF)
 option (CQLITE_DISABLE_INSTALLS "Disable all installation targets." OFF)
+option (CQLITE_BUILD_DOCUMENTATION "Build the cqlite API documentation" OFF)
 
 set (PACKAGE_NAME ${CMAKE_PROJECT_NAME})
 set (PACKAGE_VENDOR "Sphenic Systems")
@@ -105,4 +106,8 @@ if (NOT ${CQLITE_DISABLE_INSTALLS})
         DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
     include (CPack)
+endif ()
+
+if (${CQLITE_BUILD_DOCUMENTATION})
+    add_subdirectory (doc)
 endif ()

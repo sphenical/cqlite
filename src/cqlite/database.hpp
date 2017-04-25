@@ -45,6 +45,9 @@ namespace cqlite {
             using Error::Error;
     };
 
+    /**
+     * Represents a connection to a sqlite3 database file.
+     */
     class CQLITE_EXPORT Database
     {
         public:
@@ -55,8 +58,15 @@ namespace cqlite {
                 Update
             };
 
+        /**
+         * The callback that is triggered on every modifying database operation.
+         * @param op Insert, Delete, or Update
+         * @param db the name of the affected database
+         * @param table the name of the affected table
+         * @param rowid the rowid of the affected row
+         */
         using UpdateHook = std::function<
-            void (Operation, const std::string&, const std::string&, std::int64_t)>;
+            void (Operation op, const std::string& db, const std::string& table, std::int64_t rowid)>;
 
         public:
             Database (const std::string&);
@@ -73,17 +83,10 @@ namespace cqlite {
             /*!
              * @brief Adds an update hook callback that gets called on every update/insert/delete.
              *
-             * The callback has the following signature:
-             * void (Operation op, const std::string& db, const std::string& table, std::int64_t row);
-             *
-             * op: Insert, Delete, or Update
-             * db: the name of the affected database
-             * table: the name of the affected table
-             * row: the rowid of the affected row
-             *
              * Any previously set callback will silently be dropped, resp. overridden.
              *
              * @tparam Hook the type of the hook callback (in non-windows-dll version only)
+             * @see UpdateHook
              * @param hook the callback
              * @return this database
              */

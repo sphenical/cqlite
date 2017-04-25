@@ -30,6 +30,11 @@ namespace cqlite {
 
     namespace {
 
+        /**
+         * Convenience function to deal with the result of a sqlite3 bind call.
+         * @param result the result value of the called sqlite3 bind function
+         * @throws StatementError if result is not equal to SQLITE_OK
+         */
         inline void handleResult (int result)
         {
             if (result != SQLITE_OK) {
@@ -38,6 +43,11 @@ namespace cqlite {
         }
     }
 
+    /**
+     * Constructs a new statement that represents and owns the given sqlite3 statement.
+     * @param stmt the corresponding sqlite3 statement
+     * @throws StatementError if statement is null
+     */
     Statement::Statement (sqlite3_stmt* stmt) :
         stmt_ {stmt},
         index_ {0}
@@ -72,20 +82,39 @@ namespace cqlite {
         return *this;
     }
 
+    /**
+     * Cleans up the underlying sqlite3 statement
+     */
     Statement::~Statement ()
     {
         sqlite3_finalize (stmt_);
     }
 
-    Statement& Statement::operator<< (const std::pair<const void*, std::size_t>& blob)
+    /**
+     * Binds a blob.
+     * @param blob a pair that holds the data and the size of the blob to be bound
+     * @return this statement
+     * @throws StatementError if the given blob cannot be bound
+     */
+    Statement& Statement::operator<< (const std::tuple<const void*, std::size_t>& blob)
     {
         handleResult (
                 sqlite3_bind_blob64 (
-                    stmt_, ++index_, blob.first, blob.second, SQLITE_TRANSIENT));
+                    stmt_,
+                    ++index_,
+                    std::get<0> (blob),
+                    std::get<1> (blob),
+                    SQLITE_TRANSIENT));
 
         return *this;
     }
 
+    /**
+     * Binds a double.
+     * @param value the value to bind
+     * @return this statement
+     * @throws StatementError if the given value cannot be bound
+     */
     Statement& Statement::operator<< (double value)
     {
         handleResult (sqlite3_bind_double (stmt_, ++index_, value));
@@ -93,6 +122,12 @@ namespace cqlite {
         return *this;
     }
 
+    /**
+     * Binds a signed integer.
+     * @param value the value to bind
+     * @return this statement
+     * @throws StatementError if the given value cannot be bound
+     */
     Statement& Statement::operator<< (int value)
     {
         handleResult (sqlite3_bind_int (stmt_, ++index_, value));
@@ -100,6 +135,12 @@ namespace cqlite {
         return *this;
     }
 
+    /**
+     * Binds an std::size_t.
+     * @param value the value to bind
+     * @return this statement
+     * @throws StatementError if the given value cannot be bound
+     */
     Statement& Statement::operator<< (std::size_t value)
     {
         handleResult (
@@ -108,6 +149,12 @@ namespace cqlite {
         return *this;
     }
 
+    /**
+     * Binds a 64-bit signed integer.
+     * @param value the value to bind
+     * @return this statement
+     * @throws StatementError if the given value cannot be bound
+     */
     Statement& Statement::operator<< (std::int64_t value)
     {
         handleResult (sqlite3_bind_int64 (stmt_, ++index_, value));
@@ -115,6 +162,11 @@ namespace cqlite {
         return *this;
     }
 
+    /**
+     * Binds null.
+     * @return this statement
+     * @throws StatementError if null cannot be bound
+     */
     Statement& Statement::operator<< (std::nullptr_t)
     {
         handleResult (sqlite3_bind_null (stmt_, ++index_));
@@ -122,6 +174,12 @@ namespace cqlite {
         return *this;
     }
 
+    /**
+     * Binds a string.
+     * @param value the string to bind
+     * @return this statement
+     * @throws StatementError if the given string cannot be bound
+     */
     Statement& Statement::operator<< (const std::string& value)
     {
         handleResult (
@@ -136,6 +194,26 @@ namespace cqlite {
         return *this;
     }
 
+    /**
+     * Resets the statement.
+     * This resets all parameters previously bound and rewinds the binding to the first
+     * parameter. This method comes in in loops, when parameters are bound subsequently
+     * with multiple entities. E.g.
+     * @code
+
+     std::vector<Thing> things;
+     cqlite::Statement statement = db.prepare (
+         "INSERT INTO things (name, age, role) VALUES (?1, ?2, ?3)");
+     ...
+     for (const auto& thing : things) {
+        statement.reset ();
+        statement << thing.name << thing.age << thing.role;
+        statement.execute ();
+     }
+
+     @endcode
+     @return this statement
+     */
     Statement& Statement::reset ()
     {
         sqlite3_reset (stmt_);
@@ -144,6 +222,10 @@ namespace cqlite {
         return *this;
     }
 
+    /**
+     * Executes the statement and returns the corresponding result.
+     * @return the result of the corresponding execution of this statement.
+     */
     Result Statement::execute ()
     {
         Result result {stmt_};

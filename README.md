@@ -28,7 +28,7 @@ set.
 
 The following example shows a simplified usage:
 
-```c++
+```cpp
 #include <cqlite/database.hpp>
 #include <string>
 #include <iostream>
@@ -124,7 +124,7 @@ projects installation rules, producing a static library target that can then be 
 the parent project. This can be achieved with the following content placed in the
 top-level CMakeLists.txt file:
 
-```
+```cmake
 set (CQLITE_BUILD_SHARED_LIBS OFF CACHE BOOL "Build the cqlite shared library.")
 set (CQLITE_DISABLE_INSTALLS ON CACHE BOOL "Install the cqlite library.")
 add_subdirectory (vendor/cqlite)
@@ -132,7 +132,7 @@ add_subdirectory (vendor/cqlite)
 
 This leads to a static library target called `cqlite` that can then be linked to, like
 shown in the following example:
-```
+```cmake
 target_link_libraries (my_target cqlite)
 ```
 The library will then be statically linked to the application and therefore does not
@@ -145,7 +145,7 @@ the `cqlite` header files and the generated header files that are created during
 configuration. This can be achieved by the following call to `include_directories` that is
 placed in the `CMakeLists.txt` where the application is configured:
 
-```
+```cmake
 include_directories (SYSTEM
     ${CMAKE_SOURCE_DIR}/vendor/cqlite/src
     ${CMAKE_BINARY_DIR}/vendor/cqlite/src)
@@ -184,6 +184,7 @@ $ make check
 ```
 
 Windows:
-```
+```sh
 $ cmake --build . --config Debug --target check
+```
 

@@ -27,7 +27,7 @@
 
 #include    <stdexcept>
 #include    <cstdint>
-#include    <utility>
+#include    <tuple>
 
 #include    <cqlite/error.hpp>
 #include    <cqlite/result.hpp>
@@ -43,6 +43,9 @@ namespace cqlite {
             using Error::Error;
     };
 
+    /**
+     * An executable statement.
+     */
     class CQLITE_EXPORT Statement
     {
         public:
@@ -54,7 +57,7 @@ namespace cqlite {
             Statement (Statement&&);
             Statement& operator= (Statement&&);
 
-            Statement& operator<< (const std::pair<const void*, std::size_t>&);
+            Statement& operator<< (const std::tuple<const void*, std::size_t>&);
             Statement& operator<< (double);
             Statement& operator<< (int);
             Statement& operator<< (std::size_t);
