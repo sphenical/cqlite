@@ -17,7 +17,7 @@ mark_as_advanced (GTEST_LIBRARY GTEST_INCLUDE_DIR)
 set (GTEST_LIBRARIES ${GTEST_LIBRARY})
 set (GTEST_INCLUDE_DIRS ${GTEST_INCLUDE_DIR})
 
-if (NOT ${GTEST_FOUND})
+if (NOT GTEST_FOUND)
     message (FATAL_ERROR "Cannot find the gtest library.")
 endif ()
 
@@ -36,7 +36,8 @@ include_directories (SYSTEM
 set (TEST_SOURCES
     runner.cpp
     basic.cpp
-    advanced.cpp)
+    advanced.cpp
+    statements.cpp)
 
 ##########
 ## Targets

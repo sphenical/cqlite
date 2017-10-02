@@ -28,7 +28,7 @@ include_directories (SYSTEM
 #########
 # Targets
 #########
-if (${CQLITE_BUILD_SHARED_LIBS})
+if (CQLITE_BUILD_SHARED_LIBS)
     add_library (cqlite SHARED ${CQLITE_SOURCES})
     set_property (TARGET cqlite
         PROPERTY SOVERSION ${PACKAGE_VERSION_MAJOR})
@@ -72,7 +72,7 @@ list (APPEND CQLITE_INSTALL_HEADERS
 ##############
 # Installation
 ##############
-if (NOT ${CQLITE_DISABLE_INSTALLS})
+if (NOT CQLITE_DISABLE_INSTALLS)
     install (TARGETS cqlite
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
