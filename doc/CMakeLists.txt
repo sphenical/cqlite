@@ -2,7 +2,7 @@ project (cqlite-docs)
 cmake_minimum_required (VERSION 3.2)
 
 include (FindDoxygen)
-if (NOT ${DOXYGEN_FOUND})
+if (NOT DOXYGEN_FOUND)
     message (FATAL_ERROR "Cannot find doxygen, this is needed for building the docs.")
 endif ()
 
@@ -14,7 +14,7 @@ add_custom_target (doc ALL
     COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
     COMMENT "Generating API documentation.")
 
-if (NOT ${CQLITE_DISABLE_INSTALLS})
+if (NOT CQLITE_DISABLE_INSTALLS)
     install (DIRECTORY
         ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
