@@ -36,7 +36,8 @@ include_directories (SYSTEM
 set (TEST_SOURCES
     runner.cpp
     basic.cpp
-    advanced.cpp)
+    advanced.cpp
+    statements.cpp)
 
 ##########
 ## Targets
