@@ -38,9 +38,50 @@ set (PACKAGE_LICENSE "LICENSE")
 
 set (PACKAGE_VERSION_MAJOR "1")
 set (PACKAGE_VERSION_MINOR "2")
-set (PACKAGE_VERSION_PATCH "0")
+set (PACKAGE_VERSION_PATCH "1")
 set (PACKAGE_VERSION
     "${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}.${PACKAGE_VERSION_PATCH}")
+
+set (GIT_PROJECT_VERSION ${PACKAGE_VERSION})
+set (GIT_COMMIT_ID "")
+
+## Git version
+find_program (GIT_COMMAND git)
+if (GIT_COMMAND AND IS_DIRECTORY "${CMAKE_SOURCE_DIR}/.git")
+
+    execute_process (
+        COMMAND ${GIT_COMMAND} describe --tags --abbrev=0
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_PROJECT_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    string (REPLACE "." ";" _GIT_VERSION_PARTS ${GIT_PROJECT_VERSION})
+
+    list (LENGTH _GIT_VERSION_PARTS _NR_GIT_VERSION_PARTS)
+    math (EXPR _NR_GIT_VERSION_PARTS_TO_ITERATE "${_NR_GIT_VERSION_PARTS} - 1")
+    foreach (index RANGE ${_NR_GIT_VERSION_PARTS_TO_ITERATE})
+        list (GET _GIT_VERSION_PARTS ${index} item)
+        if (index EQUAL 0)
+            set (PACKAGE_VERSION_MAJOR ${item})
+        elseif (index EQUAL 1)
+            set (PACKAGE_VERSION_MINOR ${item})
+        elseif (index EQUAL 2)
+            set (PACKAGE_VERSION_PATCH ${item})
+        endif ()
+    endforeach ()
+
+    set (PACKAGE_VERSION ${GIT_PROJECT_VERSION})
+
+    execute_process (
+        COMMAND ${GIT_COMMAND} log -n 1 --format=%H
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_ID
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    message (STATUS "${PACKAGE_NAME} git commit id: ${GIT_COMMIT_ID}")
+
+endif ()
+message (STATUS "${PACKAGE_NAME} version: ${PACKAGE_VERSION}")
 
 if (NOT CQLITE_DISABLE_INSTALLS)
     set (CPACK_PACKAGE_NAME ${PACKAGE_NAME})
@@ -71,8 +112,6 @@ if (NOT CQLITE_DISABLE_INSTALLS)
     endif ()
 
     set (CPACK_SOURCE_PACKAGE_FILE_NAME "${PACKAGE_NAME}-${PACKAGE_VERSION}-src")
-    set (CPACK_SOURCE_GENERATOR "TGZ")
-
     set (CPACK_SOURCE_IGNORE_FILES
         ".*~$"
         ".git"
@@ -90,6 +129,8 @@ if (NOT CQLITE_DISABLE_INSTALLS)
         "build.*/"
         ".ycm*"
         "tags")
+
+    set (CPACK_SOURCE_GENERATOR "TGZ")
 
 endif ()
 
