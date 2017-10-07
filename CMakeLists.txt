@@ -140,6 +140,10 @@ if (CQLITE_BUILD_TESTS)
     add_subdirectory (tests)
 endif ()
 
+if (CQLITE_BUILD_DOCUMENTATION)
+    add_subdirectory (doc)
+endif ()
+
 if (NOT CQLITE_DISABLE_INSTALLS)
     install (FILES
         ${CPACK_RESOURCE_FILE_README}
@@ -147,8 +151,4 @@ if (NOT CQLITE_DISABLE_INSTALLS)
         DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
     include (CPack)
-endif ()
-
-if (CQLITE_BUILD_DOCUMENTATION)
-    add_subdirectory (doc)
 endif ()
