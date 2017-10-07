@@ -28,7 +28,7 @@ option (CQLITE_BUILD_TESTS "Enable testing." OFF)
 option (CQLITE_DISABLE_INSTALLS "Disable all installation targets." OFF)
 option (CQLITE_BUILD_DOCUMENTATION "Build the cqlite API documentation" OFF)
 
-set (PACKAGE_NAME ${CMAKE_PROJECT_NAME})
+set (PACKAGE_NAME "cqlite")
 set (PACKAGE_VENDOR "Sphenic Systems")
 set (PACKAGE_URL "https://github.com/sphenical/cqlite")
 set (PACKAGE_BUGREPORT "info@sphenic.ch")
@@ -47,12 +47,12 @@ set (GIT_COMMIT_ID "")
 
 ## Git version
 find_program (GIT_COMMAND git)
-if (GIT_COMMAND AND IS_DIRECTORY "${CMAKE_SOURCE_DIR}/.git")
+if (GIT_COMMAND AND IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
 
     execute_process (
         COMMAND ${GIT_COMMAND} describe --tags --abbrev=0
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_PROJECT_VERSION
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE CQLITE_GIT_PROJECT_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     string (REPLACE "." ";" _GIT_VERSION_PARTS ${GIT_PROJECT_VERSION})
@@ -75,10 +75,10 @@ if (GIT_COMMAND AND IS_DIRECTORY "${CMAKE_SOURCE_DIR}/.git")
     execute_process (
         COMMAND ${GIT_COMMAND} log -n 1 --format=%H
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_COMMIT_ID
+        OUTPUT_VARIABLE CQLITE_GIT_COMMIT_ID
         OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-    message (STATUS "${PACKAGE_NAME} git commit id: ${GIT_COMMIT_ID}")
+    message (STATUS "${PACKAGE_NAME} git commit id: ${CQLITE_GIT_COMMIT_ID}")
 
 endif ()
 message (STATUS "${PACKAGE_NAME} version: ${PACKAGE_VERSION}")
