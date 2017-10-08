@@ -31,7 +31,7 @@ include_directories (SYSTEM
 if (CQLITE_BUILD_SHARED_LIBS)
     add_library (cqlite SHARED ${CQLITE_SOURCES})
     set_property (TARGET cqlite
-        PROPERTY SOVERSION ${PACKAGE_VERSION_MAJOR})
+        PROPERTY SOVERSION ${CQLITE_VERSION_MAJOR})
     if (WIN32)
         set (CQLITE_WINDLL_WORKAROUND TRUE)
     endif ()
@@ -42,7 +42,7 @@ else ()
 endif ()
 
 set_target_properties (cqlite PROPERTIES
-    VERSION ${PACKAGE_VERSION}
+    VERSION ${CQLITE_VERSION}
     CXX_STANDARD 11)
 
 target_link_libraries (cqlite
