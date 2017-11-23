@@ -58,6 +58,34 @@ namespace cqlite {
                 Update
             };
 
+            /**
+             * The mode to open the database with.
+             * By default the database is opened in read-write mode and it is created if
+             * it does not already exist.
+             */
+            enum Mode
+            {
+                /** No writing, very good for read-only initialization. */
+                ReadOnly                = 0,
+                /** Read-write, the default */
+                ReadWrite               = 1 << 0,
+                /** Create if not exist, default */
+                Create                  = 1 << 1,
+                /** Use a shared cache, so the connection shares the cache with other
+                 * instances that also set this. */
+                Shared                  = 1 << 2,
+                /** Do not participate in a shared cache */
+                Private                 = 1 << 3,
+                /** Use URIs */
+                Uri                     = 1 << 4,
+                /** Use an in-memory database */
+                Memory                  = 1 << 5,
+                /** Multithreaded mode (one connection per thread) */
+                NoMutex                 = 1 << 6,
+                /** Serialized mode */
+                FullMutex               = 1 << 7,
+            };
+
         /**
          * The callback that is triggered on every modifying database operation.
          * @param op Insert, Delete, or Update
@@ -66,10 +94,12 @@ namespace cqlite {
          * @param rowid the rowid of the affected row
          */
         using UpdateHook = std::function<
-            void (Operation op, const std::string& db, const std::string& table, std::int64_t rowid)>;
+            void (Operation op, const std::string& db, const std::string& table,
+                    std::int64_t rowid)>;
 
         public:
-            Database (const std::string&);
+            Database (const std::string&,
+                    std::uint8_t = Mode::ReadWrite | Mode::Create | Mode::NoMutex);
             ~Database ();
 
             Database (const Database&) = delete;
