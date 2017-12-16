@@ -76,7 +76,8 @@ int main ()
 ```
 
 Database and Statement instances cannot be copied but they can be moved. They take care
-about resource management but they do not take care about concurrent access.
+about resource management but they do not take care about concurrent access, unless the
+database is opened with the mode `cqlite::Database::Mode::FullMutex`.
 
 ## Building
 
