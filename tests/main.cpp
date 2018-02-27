@@ -53,7 +53,7 @@ int main ()
     }
 
     Statement select = db.prepare (
-            "SELECT id, name, DATETIME (created_at, 'localtime') FROM authors");
+            "SELECT id, name, STRFTIME ('%Y-%m-%d %H:%M:%f', created_at, 'localtime') FROM authors");
 
     for (Result author = select.execute (); author; ++author) {
         std::int64_t id;

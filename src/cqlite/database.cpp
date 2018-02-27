@@ -39,13 +39,25 @@ namespace cqlite {
     /**
      * Opens a database connection on the given file.
      * @param path the path to the sqlite3 database file
+     * @param mode the mode to open the database in
+     * @sa Mode
      * @throws DbError on failure
      */
-    Database::Database (const std::string& path) :
+    Database::Database (const std::string& path, std::uint8_t mode) :
         db_ {nullptr},
         hook_ {nullptr}
     {
-        int result = sqlite3_open (path.c_str (), &db_);
+        int flags
+            = (mode & Mode::Create ? SQLITE_OPEN_CREATE : 0)
+            | (mode & Mode::ReadWrite ? SQLITE_OPEN_READWRITE : SQLITE_OPEN_READONLY)
+            | (mode & Mode::Shared ? SQLITE_OPEN_SHAREDCACHE : 0)
+            | (mode & Mode::Private ? SQLITE_OPEN_PRIVATECACHE : 0)
+            | (mode & Mode::Uri ? SQLITE_OPEN_URI : 0)
+            | (mode & Mode::Memory ? SQLITE_OPEN_MEMORY : 0)
+            | (mode & Mode::NoMutex ? SQLITE_OPEN_NOMUTEX : 0)
+            | (mode & Mode::FullMutex ? SQLITE_OPEN_FULLMUTEX : 0);
+
+        int result = sqlite3_open_v2 (path.c_str (), &db_, flags, nullptr);
 
         if (result != SQLITE_OK) {
             throw DbError {sqlite3_errstr (result)};
@@ -58,7 +70,7 @@ namespace cqlite {
 
     Database::Database () :
         db_ {nullptr},
-            hook_ {nullptr}
+        hook_ {nullptr}
     {}
 
     Database::~Database ()
