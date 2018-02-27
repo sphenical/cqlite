@@ -32,6 +32,10 @@
 
 namespace cqlite {
 
+    namespace {
+        using Callback = void (*) (void *, int, char const*, char const*, sqlite3_int64);
+    }
+
     /**
      * Opens a database connection on the given file.
      * @param path the path to the sqlite3 database file
@@ -41,11 +45,7 @@ namespace cqlite {
      */
     Database::Database (const std::string& path, std::uint8_t mode) :
         db_ {nullptr},
-#ifdef      CQLITE_WINDLL_WORKAROUND
         hook_ {nullptr}
-#else
-        hook_ {}
-#endif
     {
         int flags
             = (mode & Mode::Create ? SQLITE_OPEN_CREATE : 0)
@@ -63,12 +63,15 @@ namespace cqlite {
             throw DbError {sqlite3_errstr (result)};
         }
 
-        using Callback = void (*) (void *, int, char const*, char const*, sqlite3_int64);
-
         // If assumed that "typeof (sqlite3_int64) is_interchangeable_to typeof (std::int64_t)",
         // the following reinterpret_cast is safe.
         sqlite3_update_hook (db_, reinterpret_cast<Callback> (&Database::static_update_hook), this);
     }
+
+    Database::Database () :
+        db_ {nullptr},
+        hook_ {nullptr}
+    {}
 
     Database::~Database ()
     {
@@ -83,26 +86,30 @@ namespace cqlite {
         hook_ {std::move (other.hook_)}
     {
         other.db_ = nullptr;
-#ifdef      CQLITE_WINDLL_WORKAROUND
         other.hook_ = nullptr;
-#endif
+
+        if (db_) {
+            // rebind the hook - it still contains a pointer to the other database!
+            sqlite3_update_hook (db_, reinterpret_cast<Callback> (&Database::static_update_hook), this);
+        }
     }
 
     Database& Database::operator= (Database&& other)
     {
         if (this != &other) {
 
-            if (db_) {
-                sqlite3_close (db_);
-            }
+            sqlite3_close (db_);
 
             db_ = other.db_;
-            hook_ = std::move (other.hook_);
-
             other.db_ = nullptr;
-#ifdef      CQLITE_WINDLL_WORKAROUND
+
+            hook_ = std::move (other.hook_);
             other.hook_ = nullptr;
-#endif
+
+            if (db_) {
+                // rebind the hook - it still contains a pointer to the other database!
+                sqlite3_update_hook (db_, reinterpret_cast<Callback> (&Database::static_update_hook), this);
+            }
         }
 
         return *this;
