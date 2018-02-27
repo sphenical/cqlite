@@ -61,7 +61,7 @@ namespace cqlite {
         /**
          * The callback that is triggered on every modifying database operation.
          * @param op Insert, Delete, or Update
-         * @param db the name of the affected database
+         * @param db the name of the affected database (probably just "main")
          * @param table the name of the affected table
          * @param rowid the rowid of the affected row
          */
@@ -69,6 +69,7 @@ namespace cqlite {
             void (Operation op, const std::string& db, const std::string& table, std::int64_t rowid)>;
 
         public:
+            Database ();
             Database (const std::string&);
             ~Database ();
 

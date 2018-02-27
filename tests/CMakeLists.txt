@@ -37,7 +37,8 @@ set (TEST_SOURCES
     runner.cpp
     basic.cpp
     advanced.cpp
-    statements.cpp)
+    statements.cpp
+    move.cpp)
 
 ##########
 ## Targets
