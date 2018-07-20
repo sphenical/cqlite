@@ -48,7 +48,7 @@ pipeline {
                     publishHTML (target: [
                         allowMissing: false,
                         alwaysLinkToLastBuild: false,
-                        keepAll: false,
+                        keepAll: true,
                         reportDir: 'doc/html',
                         reportFiles: 'index.html',
                         reportName: 'Doxygen Documentation'])
