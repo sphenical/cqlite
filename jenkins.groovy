@@ -66,7 +66,7 @@ pipeline {
                         echo 'Created the directory for the coverage report.'
                     }
 
-                    sh "lcov --capture --initial --no-external --directory ${WORKSPACE}" +
+                    sh "lcov --capture --initial --no-external --directory ${WORKSPACE} " +
                        "--output-file coverage_base.info"
 
                     sh "make -j${NR_JOBS} check"
