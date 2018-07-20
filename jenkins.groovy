@@ -44,8 +44,12 @@ pipeline {
         stage ('Build debug') { 
             steps {
                 dir ('build-debug') {
-                    sh "make -j${NR_JOBS}"
-                    sh "make -j${NR_JOBS} runtests"
+                    sh "make -j${NR_JOBS} | tee compiler-output.txt"
+                    sh "make -j${NR_JOBS} runtests | tee -a compiler-output.txt"
+
+                    warnings parserConfigurations: [[
+                        parserName: 'GNU Make + GNU C Compiler (gcc)',
+                        pattern: 'compiler-output.txt']]
                 }
             }
         }
@@ -54,8 +58,14 @@ pipeline {
                 dir ('build') {
 
                     sh "make -j${NR_JOBS} check"
-
                     junit 'cqlite_testresults.xml' 
+
+                    sh 'cppcheck --xml --xml-version=2 ' +
+                       '--output-file=cppcheck-result.xml ' +
+                       '../src'
+                    warnings parserConfigurations: [[
+                        parserName: 'CPPCheck',
+                        pattern: 'cppcheck-result.xml']]
                 }
             }
         }
