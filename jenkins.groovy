@@ -60,9 +60,11 @@ pipeline {
                     sh "make -j${NR_JOBS} check"
                     junit 'cqlite_testresults.xml' 
 
-                    sh 'cppcheck --xml --xml-version=2 ' +
+                    sh 'cppcheck --template="{file},{line},{severity},{id},{message}" ' +
+                       '--enable-all --xml --xml-version=2 ' +
                        '--output-file=cppcheck-result.xml ' +
                        '../src'
+
                     warnings parserConfigurations: [[
                         parserName: 'CPPCheck',
                         pattern: 'cppcheck-result.xml']]
