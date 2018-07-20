@@ -13,15 +13,6 @@ pipeline {
 
     stages {
 
-        stage ('Fetch') {
-            steps {
-                checkout ([
-                    $class: 'GitSCM',
-                    userRemoteConfigs: [[url: 'https://github.com/sphenical/cqlite.git']],
-                    branches: [[name: "${params.BranchName}"]]
-                ])
-            }
-        }
         stage ('Clean') { 
             steps {
                 dir ('build') {
