@@ -45,7 +45,7 @@ pipeline {
             steps {
                 dir ('build-debug') {
                     sh "make -j${NR_JOBS} | tee compiler-output.txt"
-                    sh "make -j${NR_JOBS} | tee -a runtests"
+                    sh "make -j${NR_JOBS} runtests | tee -a compiler-output.txt"
 
                     warnings parserConfigurations: [[
                         parserName: 'GNU Make + GNU C Compiler (gcc)',
