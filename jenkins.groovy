@@ -61,7 +61,7 @@ pipeline {
                     junit 'cqlite_testresults.xml' 
 
                     sh 'cppcheck --template="{file},{line},{severity},{id},{message}" ' +
-                       '--enable-all --xml --xml-version=2 ' +
+                       '--enable=all --xml --xml-version=2 ' +
                        '--output-file=cppcheck-result.xml ' +
                        '../src'
 
