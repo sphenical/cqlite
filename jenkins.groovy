@@ -33,7 +33,7 @@ pipeline {
                 }
             }
         }
-        stage ('Build') { 
+        stage ('Build release') {
             steps {
                 dir ('build') {
                     sh "make -j${NR_JOBS}"
@@ -49,7 +49,7 @@ pipeline {
                 }
             }
         }
-        stage ('Test release') {
+        stage ('Test') {
             steps {
                 dir ('build') {
 
@@ -59,7 +59,7 @@ pipeline {
                 }
             }
         }
-        stage ('Test Coverage') {
+        stage ('Test coverage') {
             steps {
                 dir ('build-debug') {
                     dir ('doc/coverage') {
