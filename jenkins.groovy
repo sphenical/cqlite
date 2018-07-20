@@ -1,13 +1,6 @@
 pipeline {
 
     agent any
-    
-    parameters {
-        string (
-            name: 'BranchName',
-            defaultValue: 'refs/heads/master',
-            description: 'The branch or commit to build')
-    }
 
     stages {
 
@@ -44,6 +37,15 @@ pipeline {
             steps {
                 dir ('build') {
                     sh 'make doc'
+
+                    publishHTML (target: [
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: false,
+                        reportDir: 'doc/html',
+                        reportFiles: 'index.html',
+                        reportName: 'Doxygen Documentation',
+                        reportTitles: 'Documentation'])
                 }
             }
         }
