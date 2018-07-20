@@ -51,8 +51,7 @@ pipeline {
                         keepAll: false,
                         reportDir: 'doc/html',
                         reportFiles: 'index.html',
-                        reportName: 'Doxygen Documentation',
-                        reportTitles: 'Documentation'])
+                        reportName: 'Doxygen Documentation'])
                 }
             }
         }
