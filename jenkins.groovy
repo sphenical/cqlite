@@ -72,7 +72,7 @@ pipeline {
                     sh "make -j${NR_JOBS} check"
 
                     sh """
-                    lcov lcov --capture --no-external --directory ${WORKSPACE} --output-file coverage.info
+                    lcov --capture --no-external --directory ${WORKSPACE} --output-file coverage.info
                     lcov --add-tracefile coverage_base.info --add-tracefile coverage.info --output-file coverage.info
                     lcov --remove coverage.info '*/tests/*' --output-file coverage.info
                     lcov --remove coverage.info '*/CMakeFiles/*' --output-file coverage.info
