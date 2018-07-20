@@ -77,7 +77,7 @@ pipeline {
                     lcov --remove coverage.info '*/tests/*' --output-file coverage.info
                     lcov --remove coverage.info '*/CMakeFiles/*' --output-file coverage.info
 
-                    genhtml coverage.info -o doc/coverage
+                    genhtml --legend -o doc/coverage coverage.info
                     """
 
                     publishHTML (target: [
