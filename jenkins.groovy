@@ -2,6 +2,13 @@ pipeline {
 
     agent any
 
+    environment {
+        NR_JOBS = sh (
+                script: 'echo $((`nproc` + 1))',
+                returnStdout: true)
+            .trim ()
+    }
+
     stages {
 
         stage ('Clean') { 
@@ -21,14 +28,14 @@ pipeline {
         stage ('Build') { 
             steps {
                 dir ('build') {
-                    sh 'make -j5' 
+                    sh "make -j${NR_JOBS}"
                 }
             }
         }
         stage ('Test') {
             steps {
                 dir ('build') {
-                    sh 'make -j5 check'
+                    sh "make -j${NR_JOBS} check"
                     junit 'cqlite_testresults.xml' 
                 }
             }
@@ -52,7 +59,7 @@ pipeline {
         stage ('Package') {
             steps {
                 dir ('build') {
-                    sh 'make -j5 package'
+                    sh "make -j${NR_JOBS} package"
                     archive '*.gz,*.sh,*.xml,tests/Testing/**/*'
                 }
             }
