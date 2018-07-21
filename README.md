@@ -1,6 +1,6 @@
 # cqlite - C++ SQLite wrapper library
 
-![Build Status](https://sphenic.ch/jenkins/buildStatus/icon?job=cqlite)
+![Build Status](https://sphenic.ch/jenkins/job/cqlite/job/master/badge/icon)
 
 `cqlite` is a tiny c++ wrapper library that encapsulates the C API of
 [SQLite](https://www.sqlite.org/). There are a lot of features not exposed from the
