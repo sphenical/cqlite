@@ -1,52 +1,50 @@
+cmake_minimum_required (VERSION 3.18)
 project (cqlite-sources)
-cmake_minimum_required (VERSION 3.2)
 
-##########
-## Sources
-##########
-set (CQLITE_SOURCES
-    cqlite/code.cpp
-    cqlite/database.cpp
-    cqlite/result.cpp
-    cqlite/statement.cpp)
-
-set (CQLITE_INSTALL_HEADERS
-    cqlite/code.hpp
-    cqlite/database.hpp
-    cqlite/error.hpp
-    cqlite/result.hpp
-    cqlite/statement.hpp)
-
-#####################
-# Include directories
-#####################
-include_directories (SYSTEM
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${SQLITE3_INCLUDE_DIRS})
-
-#########
-# Targets
-#########
 if (CQLITE_BUILD_SHARED_LIBS)
-    add_library (cqlite SHARED ${CQLITE_SOURCES})
+    add_library (cqlite SHARED)
     set_property (TARGET cqlite
         PROPERTY SOVERSION ${CQLITE_VERSION_MAJOR})
     if (WIN32)
         set (CQLITE_WINDLL_WORKAROUND TRUE)
     endif ()
 else ()
-    add_library (cqlite STATIC ${CQLITE_SOURCES})
+    add_library (cqlite STATIC)
     set_property (TARGET cqlite
         PROPERTY COMPILE_FLAGS -DCQLITE_STATIC)
 endif ()
 
+target_sources (cqlite
+    PRIVATE
+        cqlite/code.cpp
+        cqlite/database.cpp
+        cqlite/result.cpp
+        cqlite/statement.cpp
+)
+
+target_link_libraries (cqlite
+    INTERFACE
+        ${SQLITE3_LIBRARIES}
+)
+
+target_include_directories (cqlite SYSTEM
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+
+add_library (cqlite::cqlite ALIAS cqlite)
+
+include_directories (SYSTEM
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${SQLITE3_INCLUDE_DIRS})
+
+
 set_target_properties (cqlite PROPERTIES
     VERSION ${CQLITE_VERSION}
     CXX_STANDARD 11)
-
-target_link_libraries (cqlite
-    ${SQLITE3_LIBRARIES})
 
 ###################
 # Generated Headers
@@ -65,18 +63,33 @@ set (CQLITE_CONFIG_HEADER_FILE
 
 configure_file (cqlite/cqlite_config.hpp.in ${CQLITE_CONFIG_HEADER_FILE} @ONLY)
 
-list (APPEND CQLITE_INSTALL_HEADERS
-    ${CQLITE_EXPORT_HEADER_FILE}
-    ${CQLITE_CONFIG_HEADER_FILE})
-
 ##############
 # Installation
 ##############
 if (NOT CQLITE_DISABLE_INSTALLS)
     install (TARGETS cqlite
+        EXPORT cqlite-config
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+    export (EXPORT cqlite-config NAMESPACE cqlite::)
+
+    install (EXPORT cqlite-config
+        NAMESPACE cqlite::
+        DESTINATION DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cqlite
+    )
+
+    write_basic_package_version_file (
+        ${CMAKE_CURRENT_BINARY_DIR}/cqlite-config-version.cmake
+        VERSION ${CMAKE_PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion
+    )
+
+    install (FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/cqlite-config-version.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cqlite
+    )
 
     if (WIN32)
         string (REGEX REPLACE "([^\\.]+)\\.lib$" "\\1.dll" SQLITE3_DLL ${SQLITE3_LIBRARIES})
@@ -87,6 +100,15 @@ if (NOT CQLITE_DISABLE_INSTALLS)
             DESTINATION ${CMAKE_INSTALL_LIBDIR})
     endif ()
 
-    install (FILES ${CQLITE_INSTALL_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cqlite)
+    install (FILES
+        ${CQLITE_CONFIG_HEADER_FILE}
+        ${CQLITE_EXPORT_HEADER_FILE}
+        cqlite/code.hpp
+        cqlite/database.hpp
+        cqlite/error.hpp
+        cqlite/result.hpp
+        cqlite/statement.hpp
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cqlite
+    )
 endif ()
 

@@ -86,6 +86,10 @@ instance it is possible to install the library system wide as a shared library o
 possible to generate a static library and use this project as a sub-project within a
 parent project, for instance in a sub-folder called `thirdparty` or `vendor` or similar.
 
+Make sure the sqlite3 library is available on the host system and can be found by the
+build system. If it is located at a special location (e.g. `/home/me/some/folder`) you can
+pass the corresponding folder to cmake with `-DCMAKE_PREFIX_PATH`.
+
 ### As a system wide shared library (default)
 
 Linux:
@@ -131,26 +135,15 @@ set (CQLITE_DISABLE_INSTALLS ON CACHE BOOL "Install the cqlite library.")
 add_subdirectory (vendor/cqlite)
 ```
 
-This leads to a static library target called `cqlite` that can then be linked to, like
+This leads to a static library target called `cqlite::cqlite` that can then be linked to, like
 shown in the following example:
 ```cmake
-target_link_libraries (my_target cqlite)
+target_link_libraries (my_target cqlite::cqlite)
 ```
 The library will then be statically linked to the application and therefore does not
 depend on the installation of the corresponding shared object. This is suitable for an
 application that does not want to expose the dependency on this library on the target host
 system.
-
-In that case the include directories need to be extended in order to be able to include
-the `cqlite` header files and the generated header files that are created during the cmake
-configuration. This can be achieved by the following call to `include_directories` that is
-placed in the `CMakeLists.txt` where the application is configured:
-
-```cmake
-include_directories (SYSTEM
-    ${CMAKE_SOURCE_DIR}/vendor/cqlite/src
-    ${CMAKE_BINARY_DIR}/vendor/cqlite/src)
-```
 
 ### For development purposes
 

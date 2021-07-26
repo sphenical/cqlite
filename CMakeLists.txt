@@ -1,12 +1,16 @@
-## cqlite
-project (cqlite)
-cmake_minimum_required (VERSION 3.2)
+cmake_minimum_required (VERSION 3.18)
+project (cqlite
+    VERSION 1.3.2
+    DESCRIPTION "C++ SQLite3 wrapper library"
+)
 
 set (CXX_STANDARD_REQUIRED ON)
 
 include (FindPackageHandleStandardArgs)
 include (GenerateExportHeader)
 include (GNUInstallDirs)
+include (CMakePackageConfigHelpers)
+
 
 ##########
 ## SQLite3
