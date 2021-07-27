@@ -1,48 +1,38 @@
 cmake_minimum_required (VERSION 3.18)
 project (cqlite
-    VERSION 1.3.2
+    VERSION 1.3.3
+    HOMEPAGE_URL "https://github.com/sphenical/cqlite"
+    LANGUAGES CXX
     DESCRIPTION "C++ SQLite3 wrapper library"
 )
 
 set (CXX_STANDARD_REQUIRED ON)
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include (FindPackageHandleStandardArgs)
 include (GenerateExportHeader)
 include (GNUInstallDirs)
 include (CMakePackageConfigHelpers)
 
-
-##########
-## SQLite3
-##########
-find_path (SQLITE3_INCLUDE_DIR NAMES sqlite3.h)
-find_library (SQLITE3_LIBRARY NAMES sqlite3)
-find_package_handle_standard_args (sqlite3 DEFAULT_MSG
-    SQLITE3_LIBRARY SQLITE3_INCLUDE_DIR)
-mark_as_advanced (SQLITE3_LIBRARY SQLITE3_INCLUDE_DIR)
-set (SQLITE3_INCLUDE_DIRS ${SQLITE3_INCLUDE_DIR})
-set (SQLITE3_LIBRARIES ${SQLITE3_LIBRARY})
-
-if (NOT SQLITE3_FOUND)
-    message (FATAL_ERROR "Cannot find the sqlite3 library.")
-endif ()
+find_package (SQLite3 REQUIRED)
 
 option (CQLITE_BUILD_SHARED_LIBS "Disable the build of the shared library." ON)
 option (CQLITE_BUILD_TESTS "Enable testing." OFF)
 option (CQLITE_DISABLE_INSTALLS "Disable all installation targets." OFF)
 option (CQLITE_BUILD_DOCUMENTATION "Build the cqlite API documentation" OFF)
 
-set (CQLITE_NAME "cqlite")
 set (CQLITE_VENDOR "Sphenic Systems")
-set (CQLITE_URL "https://github.com/sphenical/cqlite")
 set (CQLITE_BUGREPORT "info@sphenic.ch")
-set (CQLITE_DESCRIPTION_SUMMARY "A tiny c++ sqlite3 wrapper")
 set (CQLITE_README "README.md")
 set (CQLITE_LICENSE "LICENSE")
 
-set (CQLITE_VERSION_MAJOR "1")
-set (CQLITE_VERSION_MINOR "2")
-set (CQLITE_VERSION_PATCH "3")
+set (CQLITE_NAME "${PROJECT_NAME}")
+set (CQLITE_DESCRIPTION_SUMMARY "${PROJECT_DESCRIPTION}")
+set (CQLITE_URL "${PROJECT_HOMEPAGE_URL}")
+
+set (CQLITE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+set (CQLITE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+set (CQLITE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
 set (CQLITE_VERSION
     "${CQLITE_VERSION_MAJOR}.${CQLITE_VERSION_MINOR}.${CQLITE_VERSION_PATCH}")
 

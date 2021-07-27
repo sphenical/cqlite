@@ -3,10 +3,12 @@ project (cqlite-sources)
 
 if (CQLITE_BUILD_SHARED_LIBS)
     add_library (cqlite SHARED)
-    set_property (TARGET cqlite
-        PROPERTY SOVERSION ${CQLITE_VERSION_MAJOR})
     if (WIN32)
-        set (CQLITE_WINDLL_WORKAROUND TRUE)
+        target_compile_definitions (cqlite
+            PUBLIC
+                CQLITE_WINDLL_WORKAROUND
+        )
+
     endif ()
 else ()
     add_library (cqlite STATIC)
@@ -22,29 +24,26 @@ target_sources (cqlite
         cqlite/statement.cpp
 )
 
+set_target_properties (cqlite
+    PROPERTIES
+        CXX_STANDARD 11
+        VERSION ${CQLITE_VERSION}
+        SOVERSION ${CQLITE_VERSION_MAJOR}
+)
+
 target_link_libraries (cqlite
     INTERFACE
-        ${SQLITE3_LIBRARIES}
+        SQLite::SQLite3
 )
 
 target_include_directories (cqlite SYSTEM
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-
 add_library (cqlite::cqlite ALIAS cqlite)
-
-include_directories (SYSTEM
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${SQLITE3_INCLUDE_DIRS})
-
-
-set_target_properties (cqlite PROPERTIES
-    VERSION ${CQLITE_VERSION}
-    CXX_STANDARD 11)
 
 ###################
 # Generated Headers
@@ -71,18 +70,20 @@ if (NOT CQLITE_DISABLE_INSTALLS)
         EXPORT cqlite-config
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
 
     export (EXPORT cqlite-config NAMESPACE cqlite::)
 
     install (EXPORT cqlite-config
         NAMESPACE cqlite::
-        DESTINATION DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cqlite
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cqlite
     )
 
     write_basic_package_version_file (
         ${CMAKE_CURRENT_BINARY_DIR}/cqlite-config-version.cmake
-        VERSION ${CMAKE_PROJECT_VERSION}
+        VERSION ${CQLITE_VERSION}
         COMPATIBILITY SameMajorVersion
     )
 
@@ -92,10 +93,7 @@ if (NOT CQLITE_DISABLE_INSTALLS)
     )
 
     if (WIN32)
-        string (REGEX REPLACE "([^\\.]+)\\.lib$" "\\1.dll" SQLITE3_DLL ${SQLITE3_LIBRARIES})
-
         install (FILES
-            ${SQLITE3_DLL}
             ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
             DESTINATION ${CMAKE_INSTALL_LIBDIR})
     endif ()
@@ -110,5 +108,6 @@ if (NOT CQLITE_DISABLE_INSTALLS)
         cqlite/statement.hpp
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cqlite
     )
+
 endif ()
 

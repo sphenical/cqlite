@@ -1,61 +1,42 @@
 cmake_minimum_required (VERSION 3.18)
 project (cqlite-tests)
-
-##########
-## Testing
-##########
 enable_testing ()
 
-########
-## GTest
-########
-find_path (GTEST_INCLUDE_DIR NAMES gtest/gtest.h)
-find_library (GTEST_LIBRARY NAMES gtest gtest_main)
-find_package_handle_standard_args (gtest DEFAULT_MSG
-    GTEST_LIBRARY GTEST_INCLUDE_DIR)
-mark_as_advanced (GTEST_LIBRARY GTEST_INCLUDE_DIR)
-set (GTEST_LIBRARIES ${GTEST_LIBRARY})
-set (GTEST_INCLUDE_DIRS ${GTEST_INCLUDE_DIR})
+find_package (GTest REQUIRED)
+include (GoogleTest)
 
-if (NOT GTEST_FOUND)
-    message (FATAL_ERROR "Cannot find the gtest library.")
-endif ()
+add_executable (runtests)
+add_executable (maintest main.cpp)
 
-######################
-## Include directories
-######################
-include_directories (${CMAKE_CURRENT_SOURCE_DIR})
-include_directories (SYSTEM
-    ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_BINARY_DIR}/src
-    ${GTEST_INCLUDE_DIRS})
-
-########
-## Tests
-########
-set (TEST_SOURCES
-    runner.cpp
-    basic.cpp
-    advanced.cpp
-    statements.cpp
-    move.cpp)
-
-##########
-## Targets
-##########
-add_executable (runtests EXCLUDE_FROM_ALL ${TEST_SOURCES})
-add_executable (maintest EXCLUDE_FROM_ALL main.cpp)
+target_sources (runtests
+    PRIVATE
+        runner.cpp
+        basic.cpp
+        advanced.cpp
+        statements.cpp
+        move.cpp
+)
 
 target_link_libraries (runtests
     cqlite
-    ${GTEST_LIBRARIES})
+    GTest::GTest
+)
+target_include_directories (runtests
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/src
+)
 
 target_link_libraries (maintest
-    cqlite)
+    cqlite
+)
+target_include_directories (maintest
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/src
+)
 
-set_target_properties (
-    runtests maintest
-    PROPERTIES CXX_STANDARD 11)
+set_target_properties (runtests maintest
+    PROPERTIES CXX_STANDARD 11
+)
 
 ## Wincrap dll stuff
 if (WIN32)

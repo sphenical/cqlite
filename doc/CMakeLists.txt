@@ -11,7 +11,8 @@ configure_file (
     ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
 
 add_custom_target (doc ALL
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+    COMMAND
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
     COMMENT "Generating API documentation.")
 
 if (NOT CQLITE_DISABLE_INSTALLS)
