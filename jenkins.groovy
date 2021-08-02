@@ -11,7 +11,7 @@ pipeline {
 
     stages {
 
-        stage ('Clean') { 
+        stage ('Clean') {
             steps {
                 dir ('build') {
                     deleteDir ()
@@ -21,7 +21,7 @@ pipeline {
                 }
             }
         }
-        stage ('Prepare') { 
+        stage ('Prepare') {
             steps {
                 dir ('build') {
                     sh 'cmake -DCMAKE_BUILD_TYPE=Release -DCQLITE_BUILD_TESTS=ON -DCQLITE_BUILD_DOCUMENTATION=ON ..'
@@ -41,7 +41,7 @@ pipeline {
                 }
             }
         }
-        stage ('Build debug') { 
+        stage ('Build debug') {
             steps {
                 dir ('build-debug') {
                     sh "make -j${NR_JOBS} | tee compiler-output.txt"
@@ -58,7 +58,7 @@ pipeline {
                 dir ('build') {
 
                     sh "make -j${NR_JOBS} check"
-                    junit 'cqlite_testresults.xml' 
+                    junit '**/test-results/*.xml'
 
                     sh 'cppcheck --template="{file},{line},{severity},{id},{message}" ' +
                        '--enable=all --xml --xml-version=2 ' +
