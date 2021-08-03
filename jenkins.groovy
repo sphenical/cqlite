@@ -46,10 +46,6 @@ pipeline {
                 dir ('build-debug') {
                     sh "make -j${NR_JOBS} | tee compiler-output.txt"
                     sh "make -j${NR_JOBS} check"
-
-                    warnings parserConfigurations: [[
-                        parserName: 'GNU Make + GNU C Compiler (gcc)',
-                        pattern: 'compiler-output.txt']]
                 }
             }
         }
@@ -65,9 +61,10 @@ pipeline {
                        '--output-file=cppcheck-result.xml ' +
                        '../src'
 
-                    warnings parserConfigurations: [[
-                        parserName: 'CPPCheck',
-                        pattern: 'cppcheck-result.xml']]
+                    // TODO The cppcheck plugin seems to be broken
+                    // publishCppcheck ([
+                        // pattern: 'cppcheck-result.xml'
+                    // ])
                 }
             }
         }
@@ -121,7 +118,12 @@ pipeline {
             steps {
                 dir ('build') {
                     sh "make -j${NR_JOBS} package"
-                    archive '*.gz,*.sh,*.xml,tests/Testing/**/*,**/test-results/*.xml'
+                    archiveArtifacts (
+                        artifacts: '*.gz,*.sh,*.xml,tests/Testing/**/*,**/test-results/*.xml',
+                        allowEmptyArchive: false,
+                        fingerprint: true,
+                        onlyIfSuccessful: true
+                    )
                 }
             }
         }
