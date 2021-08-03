@@ -43,3 +43,11 @@ set_target_properties (cqlite_tests
 
 add_dependencies (check cqlite_tests)
 
+if (WIN32)
+    add_custom_command (TARGET cqlite_tests POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_RUNTIME_DLLS:cqlite_tests> $<TARGET_FILE_DIR:cqlite_tests>
+        COMMAND_EXPAND_LISTS
+    )
+endif ()
+
