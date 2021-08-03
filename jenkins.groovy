@@ -37,7 +37,7 @@ pipeline {
             steps {
                 dir ('build') {
                     sh "make -j${NR_JOBS}"
-                    sh "make -j${NR_JOBS} runtests"
+                    sh "make -j${NR_JOBS} check"
                 }
             }
         }
@@ -45,7 +45,7 @@ pipeline {
             steps {
                 dir ('build-debug') {
                     sh "make -j${NR_JOBS} | tee compiler-output.txt"
-                    sh "make -j${NR_JOBS} runtests | tee -a compiler-output.txt"
+                    sh "make -j${NR_JOBS} check"
 
                     warnings parserConfigurations: [[
                         parserName: 'GNU Make + GNU C Compiler (gcc)',
@@ -121,7 +121,7 @@ pipeline {
             steps {
                 dir ('build') {
                     sh "make -j${NR_JOBS} package"
-                    archive '*.gz,*.sh,*.xml,tests/Testing/**/*'
+                    archive '*.gz,*.sh,*.xml,tests/Testing/**/*,**/test-results/*.xml'
                 }
             }
         }
