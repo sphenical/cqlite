@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.18)
 project (cqlite
-    VERSION 1.3.3
+    VERSION 2.0.0
     HOMEPAGE_URL "https://github.com/sphenical/cqlite"
     LANGUAGES CXX
     DESCRIPTION "C++ SQLite3 wrapper library"
