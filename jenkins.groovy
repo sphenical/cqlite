@@ -118,7 +118,12 @@ pipeline {
             steps {
                 dir ('build') {
                     sh "make -j${NR_JOBS} package"
-                    archive '*.gz,*.sh,*.xml,tests/Testing/**/*,**/test-results/*.xml'
+                    archiveArtifacts (
+                        artifacts: '*.gz,*.sh,*.xml,tests/Testing/**/*,**/test-results/*.xml',
+                        allowEmptyArchive: false,
+                        fingerprint: true,
+                        onlyIfSuccessful: true
+                    )
                 }
             }
         }
