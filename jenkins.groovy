@@ -46,10 +46,6 @@ pipeline {
                 dir ('build-debug') {
                     sh "make -j${NR_JOBS} | tee compiler-output.txt"
                     sh "make -j${NR_JOBS} check"
-
-                    warnings parserConfigurations: [[
-                        parserName: 'GNU Make + GNU C Compiler (gcc)',
-                        pattern: 'compiler-output.txt']]
                 }
             }
         }
