@@ -61,9 +61,10 @@ pipeline {
                        '--output-file=cppcheck-result.xml ' +
                        '../src'
 
-                    publishCppcheck ([
-                        pattern: 'cppcheck-result.xml'
-                    ])
+                    // TODO The cppcheck plugin seems to be broken
+                    // publishCppcheck ([
+                        // pattern: 'cppcheck-result.xml'
+                    // ])
                 }
             }
         }
