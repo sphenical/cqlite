@@ -51,7 +51,7 @@ TEST (move, assign)
               "name TEXT\n"
               ")";
 
-        db.setUpdateHook (std::bind (&Count::up, &count));
+        db.addUpdateHook ("foo", std::bind (&Count::up, &count));
 
         other = std::move (db);
     }
@@ -74,7 +74,7 @@ TEST (move, construct)
         "name TEXT\n"
         ")";
 
-    db->setUpdateHook (std::bind (&Count::up, &count));
+    db->addUpdateHook ("foo", std::bind (&Count::up, &count));
 
     cqlite::Database other {std::move (*db)};
 

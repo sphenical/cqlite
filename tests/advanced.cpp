@@ -80,7 +80,7 @@ TEST (advanced, hook) {
     createDatabase (db);
 
     using namespace std::placeholders;
-    db.setUpdateHook (std::bind (&IdWatcher::hook, &watch, _4));
+    db.addUpdateHook ("foo", std::bind (&IdWatcher::hook, &watch, _4));
 
     insert (db);
 

@@ -26,14 +26,15 @@
 #define CQLITE_DATABASE_INC
 
 #include    <cstdint>
-#include    <string>
 #include    <functional>
+#include    <map>
+#include    <string>
 #include    <utility>
 
+#include    <cqlite/cqlite_config.hpp>
+#include    <cqlite/cqlite_export.hpp>
 #include    <cqlite/error.hpp>
 #include    <cqlite/statement.hpp>
-#include    <cqlite/cqlite_export.hpp>
-#include    <cqlite/cqlite_config.hpp>
 
 struct sqlite3;
 
@@ -111,22 +112,8 @@ namespace cqlite {
             Statement prepare (const std::string&);
             Database& operator<< (const std::string&);
 
-            /*!
-             * @brief Adds an update hook callback that gets called on every update/insert/delete.
-             *
-             * Any previously set callback will silently be dropped, resp. overridden.
-             *
-             * @tparam Hook the type of the hook callback (in non-windows-dll version only)
-             * @see UpdateHook
-             * @param hook the callback
-             * @return this database
-             */
-#ifdef      CQLITE_WINDLL_WORKAROUND
-            Database& setUpdateHook (const UpdateHook& hook);
-#else
-            template <typename Hook>
-                Database& setUpdateHook (Hook&& hook);
-#endif
+            template<typename Hook>
+                Database& addUpdateHook (const std::string& table, Hook&& hook);
 
             std::int64_t lastInsertId () const;
 
@@ -135,21 +122,27 @@ namespace cqlite {
 
         private:
             sqlite3* db_;
-#ifdef      CQLITE_WINDLL_WORKAROUND
-            UpdateHook* hook_;
-#else
-            UpdateHook hook_;
-#endif
+            std::multimap<std::string, UpdateHook> hooks_;
     };
 
-#ifndef     CQLITE_WINDLL_WORKAROUND
-    template <typename Hook>
-        inline Database& Database::setUpdateHook (Hook&& hook)
+    /*!
+     * @brief Adds an update hook callback that gets called on every
+     *        update/insert/delete on the given table.
+     *
+     * If "*" is given for \a table the hook is executed on every table.
+     *
+     * @tparam Hook Any callable that can be converted to an @ref UpdateHook
+     * @see UpdateHook
+     * @param table the name of the observed table
+     * @param hook the callback
+     * @return this database
+     */
+    template<typename Hook>
+        inline Database& Database::addUpdateHook (const std::string& table, Hook&& hook)
         {
-            hook_ = std::forward<Hook> (hook);
+            hooks_.insert ({table, std::forward<Hook> (hook)});
             return *this;
         }
-#endif
 }
 
 #endif /* CQLITE_DATABASE_INC */

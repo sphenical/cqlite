@@ -15,6 +15,12 @@ include (GNUInstallDirs)
 include (CMakePackageConfigHelpers)
 
 find_package (SQLite3 REQUIRED)
+if (WIN32)
+    string (REGEX REPLACE "([^\\.]+)\\.lib$" "\\1.dll"
+        SQLite3_LIBRARY_DLL_LOCATION
+        "${SQLite3_LIBRARIES}"
+    )
+endif ()
 
 option (CQLITE_BUILD_SHARED_LIBS "Disable the build of the shared library." ON)
 option (CQLITE_BUILD_TESTS "Enable testing." OFF)
@@ -104,8 +110,13 @@ if (NOT CQLITE_DISABLE_INSTALLS)
         set (CPACK_NSIS_URL_INFO_ABOUT ${CQLITE_URL})
         set (CPACK_NSIS_CONTACT ${CQLITE_BUGREPORT})
 
-        set (CPACK_NSIS_MENU_LINKS
-            "${CMAKE_INSTALL_DOCDIR}\\\\${CQLITE_README}" "${CPACK_NSIS_DISPLAY_NAME} - Readme")
+        if (CQLITE_BUILD_DOCUMENTATION)
+            set (CPACK_NSIS_MENU_LINKS
+                "${CMAKE_INSTALL_DOCDIR}\\\\html\\\\index.html" "${CPACK_NSIS_DISPLAY_NAME} - Readme")
+        else ()
+            set (CPACK_NSIS_MENU_LINKS
+                "${CMAKE_INSTALL_DOCDIR}\\\\${CQLITE_README}" "${CPACK_NSIS_DISPLAY_NAME} - Readme")
+        endif ()
 
     else ()
         set (CPACK_GENERATOR "STGZ;TGZ")

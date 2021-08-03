@@ -29,6 +29,7 @@
 
 #include    <thread>
 #include    <chrono>
+#include <utility>
 
 namespace cqlite {
 
@@ -45,7 +46,7 @@ namespace cqlite {
      */
     Database::Database (const std::string& path, std::uint8_t mode) :
         db_ {nullptr},
-        hook_ {nullptr}
+        hooks_ {}
     {
         int flags
             = (mode & Mode::Create ? SQLITE_OPEN_CREATE : 0)
@@ -70,23 +71,19 @@ namespace cqlite {
 
     Database::Database () :
         db_ {nullptr},
-        hook_ {nullptr}
+        hooks_ {}
     {}
 
     Database::~Database ()
     {
         sqlite3_close (db_);
-#ifdef      CQLITE_WINDLL_WORKAROUND
-        delete hook_;
-#endif
     }
 
     Database::Database (Database&& other) :
         db_ {other.db_},
-        hook_ {std::move (other.hook_)}
+        hooks_ {std::move (other.hooks_)}
     {
         other.db_ = nullptr;
-        other.hook_ = nullptr;
 
         if (db_) {
             // rebind the hook - it still contains a pointer to the other database!
@@ -103,8 +100,7 @@ namespace cqlite {
             db_ = other.db_;
             other.db_ = nullptr;
 
-            hook_ = std::move (other.hook_);
-            other.hook_ = nullptr;
+            hooks_ = std::move (other.hooks_);
 
             if (db_) {
                 // rebind the hook - it still contains a pointer to the other database!
@@ -193,24 +189,39 @@ namespace cqlite {
     {
         Database* self = static_cast<Database*> (me);
 
-#ifdef      CQLITE_WINDLL_WORKAROUND
-        if (self->hook_ && *self->hook_) {
-            UpdateHook& hook = *self->hook_;
-#else
-        if (self->hook_) {
-            UpdateHook& hook = self->hook_;
-#endif
+        auto range = self->hooks_.equal_range (table);
+        auto atHook = range.first;
+        const auto endOfHooks = range.second;
+
+        auto catchall = self->hooks_.equal_range ("*");
+        auto atCatchall = catchall.first;
+        auto endOfCatchall = catchall.second;
+
+        if (atHook != endOfHooks
+            || atCatchall != endOfCatchall)
+        {
+            Operation op = Operation::Delete;
 
             switch (operation) {
                 case SQLITE_INSERT:
-                    hook (Operation::Insert, db, table, rowid);
+                    op = Operation::Insert;
                     break;
                 case SQLITE_DELETE:
-                    hook (Operation::Delete, db, table, rowid);
+                    op = Operation::Delete;
                     break;
                 case SQLITE_UPDATE:
-                    hook (Operation::Update, db, table, rowid);
+                    op = Operation::Update;
                     break;
+                default:
+                    return;
+            }
+
+            for (; atHook != endOfHooks; ++atHook) {
+                atHook->second (op, db, table, rowid);
+            }
+
+            for (; atCatchall != endOfCatchall; ++atCatchall) {
+                atCatchall->second (op, db, table, rowid);
             }
         }
     }
@@ -223,20 +234,5 @@ namespace cqlite {
     {
         return static_cast<std::int64_t> (sqlite3_last_insert_rowid (db_));
     }
-
-#ifdef      CQLITE_WINDLL_WORKAROUND
-    Database& Database::setUpdateHook (const UpdateHook& hook)
-    {
-        if (hook_) {
-            *hook_ = hook;
-        }
-        else {
-            hook_ = new UpdateHook {hook};
-        }
-
-        return *this;
-    }
-#endif
-
 }
 
