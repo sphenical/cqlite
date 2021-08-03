@@ -64,11 +64,11 @@ pipeline {
                        '--enable=all --xml --xml-version=2 ' +
                        '--output-file=cppcheck-result.xml ' +
                        '../src'
-                }
 
-                warnings parserConfigurations: [[
-                    parserName: 'CPPCheck',
-                    pattern: 'cppcheck-result.xml']]
+                    publishCppcheck ([
+                        pattern: 'cppcheck-result.xml'
+                    ])
+                }
             }
         }
         stage ('Test coverage') {
