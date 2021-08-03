@@ -32,7 +32,7 @@ set_target_properties (cqlite
 )
 
 target_link_libraries (cqlite
-    INTERFACE
+    PRIVATE
         SQLite::SQLite3
 )
 
