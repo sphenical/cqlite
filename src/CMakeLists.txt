@@ -94,7 +94,7 @@ if (NOT CQLITE_DISABLE_INSTALLS)
 
     if (WIN32)
         install (FILES
-            ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+            ${SQLite3_LIBRARY_DLL_LOCATION}
             DESTINATION ${CMAKE_INSTALL_LIBDIR})
     endif ()
 

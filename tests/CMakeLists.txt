@@ -32,11 +32,6 @@ target_link_libraries (cqlite_tests
         GTest::gtest_main
 )
 
-gtest_discover_tests (cqlite_tests
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:cqlite_tests>
-    XML_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/test-results
-)
-
 set_target_properties (cqlite_tests
     PROPERTIES CXX_STANDARD 11
 )
@@ -46,8 +41,15 @@ add_dependencies (check cqlite_tests)
 if (WIN32)
     add_custom_command (TARGET cqlite_tests POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_RUNTIME_DLLS:cqlite_tests> $<TARGET_FILE_DIR:cqlite_tests>
+            ${SQLite3_LIBRARY_DLL_LOCATION}
+            $<TARGET_RUNTIME_DLLS:cqlite_tests>
+            $<TARGET_FILE_DIR:cqlite_tests>
         COMMAND_EXPAND_LISTS
     )
 endif ()
+
+gtest_discover_tests (cqlite_tests
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:cqlite_tests>
+    XML_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/test-results
+)
 
