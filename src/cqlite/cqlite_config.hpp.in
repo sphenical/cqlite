@@ -14,7 +14,5 @@
 #cmakedefine   CQLITE_GIT_COMMIT_ID "@CQLITE_GIT_COMMIT_ID@"
 #cmakedefine   CQLITE_GIT_PROJECT_VERSION "@CQLITE_GIT_PROJECT_VERSION@"
 
-#cmakedefine        CQLITE_WINDLL_WORKAROUND
-
 #endif /* ----- #ifndef CQLITE_CONFIG_H_INC  ----- */
 

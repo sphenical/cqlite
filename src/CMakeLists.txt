@@ -2,15 +2,7 @@ cmake_minimum_required (VERSION 3.18)
 project (cqlite-sources)
 
 add_library (cqlite)
-if (BUILD_SHARED_LIBS)
-    if (WIN32)
-        target_compile_definitions (cqlite
-            PUBLIC
-                CQLITE_WINDLL_WORKAROUND
-        )
-
-    endif ()
-else ()
+if (NOT BUILD_SHARED_LIBS)
     set_property (TARGET cqlite
         PROPERTY COMPILE_FLAGS -DCQLITE_STATIC)
 endif ()
