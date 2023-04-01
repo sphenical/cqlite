@@ -22,9 +22,10 @@
  * This is free software, and you are welcome to redistribute it
  * under certain conditions.
  */
-#include    <cqlite/statement.hpp>
+#include <cqlite/datetime.hpp>
+#include <cqlite/statement.hpp>
 
-#include    <sqlite3.h>
+#include <sqlite3.h>
 
 namespace cqlite {
 
@@ -41,25 +42,25 @@ namespace cqlite {
                 throw StatementError {sqlite3_errstr (result)};
             }
         }
-    }
+    } // namespace
+
+    StatementError::StatementError (const std::string& what) : Error {what} {}
+
+    StatementError::StatementError (const char* what) : Error {what} {}
 
     /**
      * Constructs a new statement that represents and owns the given sqlite3 statement.
      * @param stmt the corresponding sqlite3 statement
      * @throws StatementError if statement is null
      */
-    Statement::Statement (sqlite3_stmt* stmt) :
-        stmt_ {stmt},
-        index_ {0}
+    Statement::Statement (sqlite3_stmt* stmt) : stmt_ {stmt}, index_ {0}
     {
-        if (!stmt_) {
+        if (! stmt_) {
             throw StatementError {"No valid statement given"};
         }
     }
 
-    Statement::Statement (Statement&& other) :
-        stmt_ {other.stmt_},
-        index_ {other.index_}
+    Statement::Statement (Statement&& other) : stmt_ {other.stmt_}, index_ {other.index_}
     {
         other.stmt_ = nullptr;
         other.index_ = 0;
@@ -85,10 +86,7 @@ namespace cqlite {
     /**
      * Cleans up the underlying sqlite3 statement
      */
-    Statement::~Statement ()
-    {
-        sqlite3_finalize (stmt_);
-    }
+    Statement::~Statement () { sqlite3_finalize (stmt_); }
 
     /**
      * Binds a blob.
@@ -98,13 +96,8 @@ namespace cqlite {
      */
     Statement& Statement::operator<< (const std::tuple<const void*, std::size_t>& blob)
     {
-        handleResult (
-                sqlite3_bind_blob64 (
-                    stmt_,
-                    ++index_,
-                    std::get<0> (blob),
-                    std::get<1> (blob),
-                    SQLITE_TRANSIENT));
+        handleResult (sqlite3_bind_blob64 (
+            stmt_, ++index_, std::get<0> (blob), std::get<1> (blob), SQLITE_TRANSIENT));
 
         return *this;
     }
@@ -144,7 +137,7 @@ namespace cqlite {
     Statement& Statement::operator<< (std::size_t value)
     {
         handleResult (
-                sqlite3_bind_int64 (stmt_, ++index_, static_cast<std::int64_t> (value)));
+            sqlite3_bind_int64 (stmt_, ++index_, static_cast<std::int64_t> (value)));
 
         return *this;
     }
@@ -182,14 +175,22 @@ namespace cqlite {
      */
     Statement& Statement::operator<< (const std::string& value)
     {
+        handleResult (sqlite3_bind_text64 (stmt_, ++index_, value.c_str (), value.size (),
+            SQLITE_TRANSIENT, SQLITE_UTF8));
+
+        return *this;
+    }
+
+    /**
+     * Binds a std::chrono::time_point<std::chrono::system_clock>
+     * @param dateTime the time_point to bind
+     * @return this statement
+     * @throws StatementError if the given string cannot be bound
+     */
+    Statement& Statement::operator<< (const DateTime& dateTime)
+    {
         handleResult (
-                sqlite3_bind_text64 (
-                    stmt_,
-                    ++index_,
-                    value.c_str (),
-                    value.size (),
-                    SQLITE_TRANSIENT,
-                    SQLITE_UTF8));
+            sqlite3_bind_int64 (stmt_, ++index_, dateTime.time_since_epoch ().count ()));
 
         return *this;
     }
@@ -232,5 +233,5 @@ namespace cqlite {
         ++result;
         return result;
     }
-}
+} // namespace cqlite
 

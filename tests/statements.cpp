@@ -22,20 +22,23 @@
  * This is free software, and you are welcome to redistribute it
  * under certain conditions.
  */
-#include    <cqlite/database.hpp>
-#include    <gtest/gtest.h>
+#include <cqlite/database.hpp>
+#include <cqlite/datetime.hpp>
+
+#include <gtest/gtest.h>
+
+#include <iostream>
 
 using namespace cqlite;
 
 namespace {
     Database& createDatabase (Database& db)
     {
-        db <<
-            "CREATE TABLE foo ("
-            "id INTEGER PRIMARY KEY, "
-            "name TEXT, "
-            "created_at TEXT NOT NULL DEFAULT (STRFTIME ('%Y-%m-%dT%H:%M:%fZ'))"
-            ")";
+        db << "CREATE TABLE foo ("
+              "id INTEGER PRIMARY KEY, "
+              "name TEXT, "
+              "created_at TEXT NOT NULL DEFAULT (STRFTIME ('%Y-%m-%dT%H:%M:%fZ'))"
+              ")";
 
         return db;
     }
@@ -44,14 +47,13 @@ namespace {
     {
         std::size_t count;
 
-        db.prepare ("SELECT COUNT (name) FROM foo").execute ()
-            >> count;
+        db.prepare ("SELECT COUNT (name) FROM foo").execute () >> count;
 
         return count;
     }
-}
+} // namespace
 
-TEST (statement, extra)
+TEST (statement, reset_and_reassign_succeeds_in_inserting_multiple_values)
 {
     Database db {":memory:"};
     createDatabase (db);
@@ -74,5 +76,35 @@ TEST (statement, extra)
     first.execute ();
 
     ASSERT_EQ (countNames (db), 3);
+}
+
+TEST (statement, date_time_can_be_inserted)
+{
+    Database db {":memory:"};
+    db << "CREATE TABLE foo ("
+          "id INTEGER PRIMARY KEY, "
+          "name TEXT, "
+          "created_at INTEGER NOT NULL DEFAULT 0"
+          ")";
+
+    const auto now = DateTime::clock::now ();
+
+    Statement statement
+        = db.prepare ("INSERT INTO foo (name, created_at) VALUES (?1, ?2)");
+
+    statement << "Peter" << now;
+    statement.execute ();
+
+    Statement select = db.prepare ("SELECT name, created_at FROM foo");
+    Result result = select.execute ();
+
+    ASSERT_TRUE (result);
+
+    std::string name;
+    DateTime extracted;
+
+    result >> name >> extracted;
+
+    ASSERT_EQ (now, extracted);
 }
 

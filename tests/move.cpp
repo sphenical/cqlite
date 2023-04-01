@@ -22,12 +22,12 @@
  * This is free software, and you are welcome to redistribute it
  * under certain conditions.
  */
-#include    <cqlite/database.hpp>
+#include <cqlite/database.hpp>
 
-#include    <gtest/gtest.h>
+#include <gtest/gtest.h>
 
-#include    <memory>
-#include    <functional>
+#include <functional>
+#include <memory>
 
 struct Count
 {
@@ -36,10 +36,9 @@ struct Count
     void up ();
 };
 
-void Count::up ()
-{ ++count; }
+void Count::up () { ++count; }
 
-TEST (move, assign)
+TEST (database, the_database_instance_can_be_moved)
 {
     Count count;
     cqlite::Database other;
@@ -61,8 +60,7 @@ TEST (move, assign)
     ASSERT_EQ (count.count, 1);
 }
 
-
-TEST (move, construct)
+TEST (database, a_dabase_instance_can_be_move_constructed)
 {
     using DbPtr = std::unique_ptr<cqlite::Database>;
 
@@ -70,15 +68,13 @@ TEST (move, construct)
     DbPtr db {new cqlite::Database {":memory:"}};
 
     *db << "CREATE TABLE foo (\n"
-        "id INTEGER PRIMARY KEY ASC NOT NULL,\n"
-        "name TEXT\n"
-        ")";
+           "id INTEGER PRIMARY KEY ASC NOT NULL,\n"
+           "name TEXT\n"
+           ")";
 
     db->addUpdateHook ("foo", std::bind (&Count::up, &count));
 
-    cqlite::Database other {std::move (*db)};
-
-    db.reset (nullptr);
+    cqlite::Database other {std::move (*db.release ())};
 
     other << "INSERT INTO foo (name) VALUES ('martin schulz')";
 

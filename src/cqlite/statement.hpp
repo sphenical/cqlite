@@ -25,22 +25,26 @@
 #ifndef CQLITE_STATEMENT_INC
 #define CQLITE_STATEMENT_INC
 
-#include    <stdexcept>
-#include    <cstdint>
-#include    <tuple>
+#include <cqlite/cqlite_export.hpp>
+#include <cqlite/datetime.hpp>
+#include <cqlite/error.hpp>
+#include <cqlite/result.hpp>
 
-#include    <cqlite/error.hpp>
-#include    <cqlite/result.hpp>
-#include    <cqlite/cqlite_export.hpp>
+#include <cstdint>
+#include <stdexcept>
+#include <tuple>
 
 struct sqlite3_stmt;
 
 namespace cqlite {
 
-    class StatementError : public Error
+    class CQLITE_EXPORT StatementError : public Error
     {
-        public:
-            using Error::Error;
+        using Base = Error;
+
+      public:
+        explicit StatementError (const std::string&);
+        explicit StatementError (const char*);
     };
 
     /**
@@ -48,32 +52,33 @@ namespace cqlite {
      */
     class CQLITE_EXPORT Statement
     {
-        public:
-            Statement (sqlite3_stmt*);
-            ~Statement ();
+      public:
+        explicit Statement (sqlite3_stmt*);
+        ~Statement ();
 
-            Statement (const Statement&) = delete;
-            Statement& operator= (const Statement&) = delete;
-            Statement (Statement&&);
-            Statement& operator= (Statement&&);
+        Statement (const Statement&) = delete;
+        Statement& operator= (const Statement&) = delete;
+        Statement (Statement&&);
+        Statement& operator= (Statement&&);
 
-            Statement& operator<< (const std::tuple<const void*, std::size_t>&);
-            Statement& operator<< (double);
-            Statement& operator<< (int);
-            Statement& operator<< (std::size_t);
-            Statement& operator<< (std::int64_t);
-            Statement& operator<< (std::nullptr_t);
-            Statement& operator<< (const std::string&);
+        Statement& operator<< (const std::tuple<const void*, std::size_t>&);
+        Statement& operator<< (double);
+        Statement& operator<< (int);
+        Statement& operator<< (std::size_t);
+        Statement& operator<< (std::int64_t);
+        Statement& operator<< (std::nullptr_t);
+        Statement& operator<< (const std::string&);
+        Statement& operator<< (const DateTime&);
 
-            Statement& reset ();
+        Statement& reset ();
 
-            Result execute ();
+        Result execute ();
 
-        private:
-            sqlite3_stmt* stmt_;
-            int index_;
+      private:
+        sqlite3_stmt* stmt_;
+        int index_;
     };
-}
+} // namespace cqlite
 
 #endif /* CQLITE_STATEMENT_INC */
 

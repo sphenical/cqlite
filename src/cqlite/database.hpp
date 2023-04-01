@@ -25,25 +25,28 @@
 #ifndef CQLITE_DATABASE_INC
 #define CQLITE_DATABASE_INC
 
-#include    <cstdint>
-#include    <functional>
-#include    <map>
-#include    <string>
-#include    <utility>
+#include <cqlite/cqlite_config.hpp>
+#include <cqlite/cqlite_export.hpp>
+#include <cqlite/error.hpp>
+#include <cqlite/statement.hpp>
 
-#include    <cqlite/cqlite_config.hpp>
-#include    <cqlite/cqlite_export.hpp>
-#include    <cqlite/error.hpp>
-#include    <cqlite/statement.hpp>
+#include <cstdint>
+#include <functional>
+#include <map>
+#include <string>
+#include <utility>
 
 struct sqlite3;
 
 namespace cqlite {
 
-    class DbError : public Error
+    class CQLITE_EXPORT DbError : public Error
     {
-        public:
-            using Error::Error;
+        using Base = Error;
+
+      public:
+        explicit DbError (const std::string&);
+        explicit DbError (const char*);
     };
 
     /**
@@ -51,41 +54,41 @@ namespace cqlite {
      */
     class CQLITE_EXPORT Database
     {
-        public:
-            enum class Operation
-            {
-                Insert,
-                Delete,
-                Update
-            };
+      public:
+        enum class Operation
+        {
+            Insert,
+            Delete,
+            Update
+        };
 
-            /**
-             * The mode to open the database with.
-             * By default the database is opened in read-write mode and it is created if
-             * it does not already exist.
-             */
-            enum Mode
-            {
-                /** No writing, very good for read-only initialization. */
-                ReadOnly                = 0,
-                /** Read-write, the default */
-                ReadWrite               = 1 << 0,
-                /** Create if not exist, default */
-                Create                  = 1 << 1,
-                /** Use a shared cache, so the connection shares the cache with other
-                 * instances that also set this. */
-                Shared                  = 1 << 2,
-                /** Do not participate in a shared cache */
-                Private                 = 1 << 3,
-                /** Use URIs */
-                Uri                     = 1 << 4,
-                /** Use an in-memory database */
-                Memory                  = 1 << 5,
-                /** Multithreaded mode (one connection per thread) */
-                NoMutex                 = 1 << 6,
-                /** Serialized mode */
-                FullMutex               = 1 << 7,
-            };
+        /**
+         * The mode to open the database with.
+         * By default the database is opened in read-write mode and it is created if
+         * it does not already exist.
+         */
+        enum Mode
+        {
+            /** No writing, very good for read-only initialization. */
+            ReadOnly = 0,
+            /** Read-write, the default */
+            ReadWrite = 1 << 0,
+            /** Create if not exist, default */
+            Create = 1 << 1,
+            /** Use a shared cache, so the connection shares the cache with other
+             * instances that also set this. */
+            Shared = 1 << 2,
+            /** Do not participate in a shared cache */
+            Private = 1 << 3,
+            /** Use URIs */
+            Uri = 1 << 4,
+            /** Use an in-memory database */
+            Memory = 1 << 5,
+            /** Multithreaded mode (one connection per thread) */
+            NoMutex = 1 << 6,
+            /** Serialized mode */
+            FullMutex = 1 << 7,
+        };
 
         /**
          * The callback that is triggered on every modifying database operation.
@@ -94,35 +97,35 @@ namespace cqlite {
          * @param table the name of the affected table
          * @param rowid the rowid of the affected row
          */
-        using UpdateHook = std::function<
-            void (Operation op, const std::string& db, const std::string& table,
-                    std::int64_t rowid)>;
+        using UpdateHook = std::function<void (Operation op, const std::string& db,
+            const std::string& table, std::int64_t rowid)>;
 
-        public:
-            Database ();
-            Database (const std::string&,
-                    std::uint8_t = Mode::ReadWrite | Mode::Create | Mode::NoMutex);
-            ~Database ();
+      public:
+        Database ();
+        explicit Database (const std::string&,
+            std::uint8_t = Mode::ReadWrite | Mode::Create | Mode::NoMutex);
+        ~Database ();
 
-            Database (const Database&) = delete;
-            Database& operator= (const Database&) = delete;
-            Database (Database&&);
-            Database& operator= (Database&&);
+        Database (const Database&) = delete;
+        Database& operator= (const Database&) = delete;
+        Database (Database&&);
+        Database& operator= (Database&&);
 
-            Statement prepare (const std::string&);
-            Database& operator<< (const std::string&);
+        Statement prepare (const std::string&);
+        Database& operator<< (const std::string&);
 
-            template<typename Hook>
-                Database& addUpdateHook (const std::string& table, Hook&& hook);
+        template <typename Hook>
+        Database& addUpdateHook (const std::string& table, Hook&& hook);
 
-            std::int64_t lastInsertId () const;
+        std::int64_t lastInsertId () const;
 
-        private:
-            static void static_update_hook (void*, int, char const*, char const*, std::int64_t);
+      private:
+        static void static_update_hook (
+            void*, int, char const*, char const*, std::int64_t);
 
-        private:
-            sqlite3* db_;
-            std::multimap<std::string, UpdateHook> hooks_;
+      private:
+        sqlite3* db_;
+        std::multimap<std::string, UpdateHook> hooks_;
     };
 
     /*!
@@ -137,13 +140,13 @@ namespace cqlite {
      * @param hook the callback
      * @return this database
      */
-    template<typename Hook>
-        inline Database& Database::addUpdateHook (const std::string& table, Hook&& hook)
-        {
-            hooks_.insert ({table, std::forward<Hook> (hook)});
-            return *this;
-        }
-}
+    template <typename Hook>
+    inline Database& Database::addUpdateHook (const std::string& table, Hook&& hook)
+    {
+        hooks_.insert ({table, std::forward<Hook> (hook)});
+        return *this;
+    }
+} // namespace cqlite
 
 #endif /* CQLITE_DATABASE_INC */
 

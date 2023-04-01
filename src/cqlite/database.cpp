@@ -22,20 +22,24 @@
  * This is free software, and you are welcome to redistribute it
  * under certain conditions.
  */
-#include    <cqlite/database.hpp>
-#include    <cqlite/code.hpp>
+#include <cqlite/code.hpp>
+#include <cqlite/database.hpp>
 
-#include    <sqlite3.h>
+#include <sqlite3.h>
 
-#include    <thread>
-#include    <chrono>
+#include <chrono>
+#include <thread>
 #include <utility>
 
 namespace cqlite {
 
     namespace {
-        using Callback = void (*) (void *, int, char const*, char const*, sqlite3_int64);
+        using Callback = void (*) (void*, int, char const*, char const*, sqlite3_int64);
     }
+
+    DbError::DbError (const std::string& what) : Error {what} {}
+
+    DbError::DbError (const char* what) : Error {what} {}
 
     /**
      * Opens a database connection on the given file.
@@ -45,8 +49,7 @@ namespace cqlite {
      * @throws DbError on failure
      */
     Database::Database (const std::string& path, std::uint8_t mode) :
-        db_ {nullptr},
-        hooks_ {}
+        db_ {nullptr}, hooks_ {}
     {
         int flags
             = (mode & Mode::Create ? SQLITE_OPEN_CREATE : 0)
@@ -64,30 +67,25 @@ namespace cqlite {
             throw DbError {sqlite3_errstr (result)};
         }
 
-        // If assumed that "typeof (sqlite3_int64) is_interchangeable_to typeof (std::int64_t)",
-        // the following reinterpret_cast is safe.
-        sqlite3_update_hook (db_, reinterpret_cast<Callback> (&Database::static_update_hook), this);
+        // If assumed that "typeof (sqlite3_int64) is_interchangeable_to typeof
+        // (std::int64_t)", the following reinterpret_cast is safe.
+        sqlite3_update_hook (
+            db_, reinterpret_cast<Callback> (&Database::static_update_hook), this);
     }
 
-    Database::Database () :
-        db_ {nullptr},
-        hooks_ {}
-    {}
+    Database::Database () : db_ {nullptr}, hooks_ {} {}
 
-    Database::~Database ()
-    {
-        sqlite3_close (db_);
-    }
+    Database::~Database () { sqlite3_close (db_); }
 
     Database::Database (Database&& other) :
-        db_ {other.db_},
-        hooks_ {std::move (other.hooks_)}
+        db_ {other.db_}, hooks_ {std::move (other.hooks_)}
     {
         other.db_ = nullptr;
 
         if (db_) {
             // rebind the hook - it still contains a pointer to the other database!
-            sqlite3_update_hook (db_, reinterpret_cast<Callback> (&Database::static_update_hook), this);
+            sqlite3_update_hook (
+                db_, reinterpret_cast<Callback> (&Database::static_update_hook), this);
         }
     }
 
@@ -104,7 +102,8 @@ namespace cqlite {
 
             if (db_) {
                 // rebind the hook - it still contains a pointer to the other database!
-                sqlite3_update_hook (db_, reinterpret_cast<Callback> (&Database::static_update_hook), this);
+                sqlite3_update_hook (db_,
+                    reinterpret_cast<Callback> (&Database::static_update_hook), this);
             }
         }
 
@@ -126,9 +125,8 @@ namespace cqlite {
         const char* const Content = sql.c_str ();
 
         while ((result = sqlite3_prepare_v2 (db_, Content, Length, &stmt, nullptr))
-                == SQLITE_BUSY
-                && ++count < 5)
-        {
+                   == SQLITE_BUSY
+               && ++count < 5) {
             std::this_thread::sleep_for (std::chrono::milliseconds {20});
         }
 
@@ -136,7 +134,7 @@ namespace cqlite {
             throw DbError {sqlite3_errstr (result)};
         }
 
-        return stmt;
+        return Statement {stmt};
     }
 
     /**
@@ -147,15 +145,13 @@ namespace cqlite {
      */
     Database& Database::operator<< (const std::string& sql)
     {
-        char *errstr = nullptr;
+        char* errstr = nullptr;
         std::size_t count {0};
         int result;
 
-        while ((result = sqlite3_exec (
-                        db_, sql.c_str (), nullptr, nullptr, &errstr))
-                == SQLITE_BUSY
-                && ++count < 5)
-        {
+        while ((result = sqlite3_exec (db_, sql.c_str (), nullptr, nullptr, &errstr))
+                   == SQLITE_BUSY
+               && ++count < 5) {
             std::this_thread::sleep_for (std::chrono::milliseconds {20});
         }
 
@@ -185,7 +181,8 @@ namespace cqlite {
      * @param table the name of the affected table
      * @param rowid the id of the affected row
      */
-    void Database::static_update_hook (void* me, int operation, char const* db, char const* table, std::int64_t rowid)
+    void Database::static_update_hook (
+        void* me, int operation, char const* db, char const* table, std::int64_t rowid)
     {
         Database* self = static_cast<Database*> (me);
 
@@ -197,9 +194,7 @@ namespace cqlite {
         auto atCatchall = catchall.first;
         auto endOfCatchall = catchall.second;
 
-        if (atHook != endOfHooks
-            || atCatchall != endOfCatchall)
-        {
+        if (atHook != endOfHooks || atCatchall != endOfCatchall) {
             Operation op = Operation::Delete;
 
             switch (operation) {
@@ -234,5 +229,5 @@ namespace cqlite {
     {
         return static_cast<std::int64_t> (sqlite3_last_insert_rowid (db_));
     }
-}
+} // namespace cqlite
 

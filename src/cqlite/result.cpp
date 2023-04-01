@@ -22,16 +22,20 @@
  * This is free software, and you are welcome to redistribute it
  * under certain conditions.
  */
-#include    <cqlite/result.hpp>
-#include    <cqlite/error.hpp>
-#include    <cqlite/code.hpp>
+#include <cqlite/code.hpp>
+#include <cqlite/error.hpp>
+#include <cqlite/result.hpp>
 
-#include    <sqlite3.h>
+#include <sqlite3.h>
 
-#include    <thread>
-#include    <chrono>
+#include <chrono>
+#include <thread>
 
 namespace cqlite {
+
+    QueryError::QueryError (const std::string& what) : Error {what} {}
+
+    QueryError::QueryError (const char* what) : Error {what} {}
 
     /**
      * Creates a new result from the given sqlite3 statement.
@@ -40,10 +44,7 @@ namespace cqlite {
      * @param stmt the statement
      * @throws Error if stmt is null
      */
-    Result::Result (sqlite3_stmt* stmt) :
-        stmt_ {stmt},
-        index_ {0},
-        state_ {SQLITE_ROW}
+    Result::Result (sqlite3_stmt* stmt) : stmt_ {stmt}, index_ {0}, state_ {SQLITE_ROW}
     {
         if (stmt_ == nullptr) {
             throw Error {"No valid statement given."};
@@ -97,8 +98,8 @@ namespace cqlite {
             int result;
             std::size_t count {0};
 
-            while ((result = sqlite3_step (stmt_)) == SQLITE_BUSY && ++count < 5) {
-                std::this_thread::sleep_for (std::chrono::milliseconds {20});
+            while ((result = sqlite3_step (stmt_)) == SQLITE_BUSY && count++ < 5) {
+                std::this_thread::sleep_for (std::chrono::milliseconds {1});
             }
 
             if (Code::isError (result)) {
@@ -171,11 +172,11 @@ namespace cqlite {
      */
     Result& Result::operator>> (std::string& value)
     {
-        const char* text = reinterpret_cast<const char*> (
-                sqlite3_column_text (stmt_, index_));
+        const char* text
+            = reinterpret_cast<const char*> (sqlite3_column_text (stmt_, index_));
 
-        std::size_t size = static_cast<std::size_t> (
-                sqlite3_column_bytes (stmt_, index_));
+        std::size_t size
+            = static_cast<std::size_t> (sqlite3_column_bytes (stmt_, index_));
 
         ++index_;
 
@@ -213,10 +214,24 @@ namespace cqlite {
     {
         std::get<0> (data) = sqlite3_column_blob (stmt_, index_);
 
-        std::get<1> (data) = static_cast<std::size_t> (
-                sqlite3_column_bytes (stmt_, index_));
+        std::get<1> (data)
+            = static_cast<std::size_t> (sqlite3_column_bytes (stmt_, index_));
 
         ++index_;
+
+        return *this;
+    }
+
+    /**
+     * Extracts a std::chrono::time_point<std::chrono::system_clock> from the next column.
+     * @param dateTime the time_point to extract
+     * @return this result
+     */
+    Result& Result::operator>> (DateTime& dateTime)
+    {
+        auto count = sqlite3_column_int64 (stmt_, index_++);
+
+        dateTime = DateTime {DateTime::clock::duration {count}};
 
         return *this;
     }
@@ -225,10 +240,7 @@ namespace cqlite {
      * Whether more rows are available.
      * @return true if more rows are available
      */
-    Result::operator bool () const
-    {
-        return state_ == SQLITE_ROW;
-    }
+    Result::operator bool () const { return state_ == SQLITE_ROW; }
 
     /**
      * Returns the type of the next available column within this result set.
@@ -260,5 +272,5 @@ namespace cqlite {
 
         return type;
     }
-}
+} // namespace cqlite
 
