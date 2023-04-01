@@ -1,0 +1,79 @@
+﻿---
+BasedOnStyle: WebKit
+AccessModifierOffset: '-2'
+BreakBeforeBraces: Custom
+BreakBeforeTernaryOperators: 'true'
+BreakAfterJavaFieldAnnotations: 'true'
+BreakConstructorInitializers: AfterColon
+BreakInheritanceList: AfterColon
+CompactNamespaces: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+Cpp11BracedListStyle: 'true'
+FixNamespaceComments: 'true'
+ReflowComments: 'true'
+SortUsingDeclarations: 'true'
+SpaceInEmptyBlock: false
+IndentCaseLabels: true
+IndentWidth: '4'
+ContinuationIndentWidth: '4'
+ColumnLimit: 90
+NamespaceIndentation: All
+IndentPPDirectives: AfterHash
+SortIncludes: 'true'
+SpaceAfterCStyleCast: 'true'
+SpaceAfterLogicalNot: 'true'
+SpaceAfterTemplateKeyword: 'true'
+SpaceBeforeAssignmentOperators: 'true'
+SpaceBeforeCpp11BracedList: 'true'
+SpaceBeforeCtorInitializerColon: 'true'
+SpaceBeforeInheritanceColon: 'true'
+SpaceBeforeParens: Always
+SpaceInEmptyParentheses: 'false'
+SpacesInAngles: 'false'
+SpacesInCStyleCastParentheses: 'false'
+SpacesInParentheses: 'false'
+SpacesInSquareBrackets: 'false'
+Standard: Auto
+TabWidth: '4'
+UseTab: Never
+AlignTrailingComments: 'true'
+AlignArrayOfStructures: Right
+AlignOperands: AlignAfterOperator
+AlignTrailingComments: true
+AllowShortBlocksOnASingleLine: Empty
+AlignConsecutiveMacros: true
+BraceWrapping:
+  AfterCaseLabel:  true
+  AfterClass:      true
+  AfterControlStatement: false
+  AfterEnum:       true
+  AfterFunction:   true
+  AfterNamespace:  false
+  AfterObjCDeclaration: true
+  AfterStruct:     true
+  AfterUnion:      true
+  AfterExternBlock: false
+  BeforeCatch:     true
+  BeforeElse:      true
+  BeforeLambdaBody: true
+  BeforeWhile:     true
+  IndentBraces:    false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:           '^"'
+    Priority:        1
+    CaseSensitive:   false
+  - Regex:           '^<[[:alnum:]/_-]+\.[hH][pPcCxX+]+>'
+    Priority:        2
+    CaseSensitive:   false
+  - Regex:           '^<[[:alnum:]/_-]+\.[hH]>'
+    Priority:        3
+    CaseSensitive:   false
+  - Regex:           '^<[[:alnum:]/_-]+>'
+    Priority:        4
+    CaseSensitive:   false
+...
+

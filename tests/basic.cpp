@@ -22,16 +22,16 @@
  * This is free software, and you are welcome to redistribute it
  * under certain conditions.
  */
-#include    <cqlite/database.hpp>
+#include <cqlite/database.hpp>
 
-#include    <gtest/gtest.h>
+#include <gtest/gtest.h>
 
 using namespace cqlite;
 
 namespace {
     const char* const NAME = "Jane ''Fonda'";
     const std::size_t COUNT = 10;
-}
+} // namespace
 
 Database create ()
 {
@@ -63,27 +63,21 @@ Database insert ()
     return db;
 }
 
-TEST (basic, createdb)
-{
-    ASSERT_NO_THROW (create ());
-}
+TEST (database, creating_database_and_schema_succeeds) { ASSERT_NO_THROW (create ()); }
 
-TEST (basic, insert)
+TEST (database, inserting_multiple_values_into_one_table_succeeds)
 {
     ASSERT_NO_THROW (insert ());
 }
 
-TEST (basic, select)
+TEST (database, inserting_and_retrieving_values_from_one_table_succeeds)
 {
     Database db = insert ();
 
     Statement stmt = db.prepare ("SELECT id, name FROM foo");
 
     std::size_t count {0};
-    for (Result result = stmt.execute ();
-            result;
-            ++result, ++count)
-    {
+    for (Result result = stmt.execute (); result; ++result, ++count) {
         std::string name;
         int id;
 

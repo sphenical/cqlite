@@ -22,9 +22,10 @@
  * This is free software, and you are welcome to redistribute it
  * under certain conditions.
  */
-#include    <cqlite/statement.hpp>
+#include <cqlite/datetime.hpp>
+#include <cqlite/statement.hpp>
 
-#include    <sqlite3.h>
+#include <sqlite3.h>
 
 namespace cqlite {
 
@@ -190,6 +191,23 @@ namespace cqlite {
                     value.size (),
                     SQLITE_TRANSIENT,
                     SQLITE_UTF8));
+
+        return *this;
+    }
+
+    /**
+     * Binds a std::chrono::time_point<std::chrono::system_clock>
+     * @param dateTime the time_point to bind
+     * @return this statement
+     * @throws StatementError if the given string cannot be bound
+     */
+    Statement& Statement::operator<< (const DateTime& dateTime)
+    {
+        handleResult (
+                sqlite3_bind_int64 (
+                    stmt_,
+                    ++index_,
+                    dateTime.time_since_epoch ().count ()));
 
         return *this;
     }

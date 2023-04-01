@@ -25,14 +25,16 @@
 #ifndef CQLITE_RESULT_INC
 #define CQLITE_RESULT_INC
 
-#include    <cstddef>
-#include    <string>
-#include    <stdexcept>
-#include    <utility>
-#include    <tuple>
+#include <cqlite/cqlite_export.hpp>
+#include <cqlite/datetime.hpp>
+#include <cqlite/error.hpp>
 
-#include    <cqlite/error.hpp>
-#include    <cqlite/cqlite_export.hpp>
+#include <chrono>
+#include <cstddef>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
 
 struct sqlite3_stmt;
 
@@ -40,8 +42,8 @@ namespace cqlite {
 
     class QueryError : public Error
     {
-        public:
-            using Error::Error;
+      public:
+        using Error::Error;
     };
 
     /**
@@ -49,43 +51,43 @@ namespace cqlite {
      */
     class CQLITE_EXPORT Result
     {
-        public:
+      public:
+        enum class Type
+        {
+            Null,
+            Integer,
+            Float,
+            Text,
+            Blob
+        };
 
-            enum class Type
-            {
-                Null,
-                Integer,
-                Float,
-                Text,
-                Blob
-            };
+      public:
+        explicit Result (sqlite3_stmt*);
 
-        public:
-            Result (sqlite3_stmt*);
+        std::size_t columns () const;
+        std::size_t dataColumns () const;
 
-            std::size_t columns () const;
-            std::size_t dataColumns () const;
+        Result& operator++ ();
+        Result operator++ (int);
 
-            Result& operator++ ();
-            Result operator++ (int);
+        Result& operator>> (int&);
+        Result& operator>> (std::size_t&);
+        Result& operator>> (std::int64_t&);
+        Result& operator>> (double&);
+        Result& operator>> (std::string&);
+        Result& operator>> (std::pair<const void*, std::size_t>&);
+        Result& operator>> (std::tuple<const void*&, std::size_t&>);
+        Result& operator>> (DateTime&);
 
-            Result& operator>> (int&);
-            Result& operator>> (std::size_t&);
-            Result& operator>> (std::int64_t&);
-            Result& operator>> (double&);
-            Result& operator>> (std::string&);
-            Result& operator>> (std::pair<const void*, std::size_t>&);
-            Result& operator>> (std::tuple<const void*&, std::size_t&>);
+        operator bool () const;
+        Type type () const;
 
-            operator bool () const;
-            Type type () const;
-
-        private:
-            sqlite3_stmt* stmt_;
-            int index_;
-            int state_;
+      private:
+        sqlite3_stmt* stmt_;
+        int index_;
+        int state_;
     };
-}
+} // namespace cqlite
 
 #endif /* CQLITE_RESULT_INC */
 

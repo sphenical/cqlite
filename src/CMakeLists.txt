@@ -26,7 +26,7 @@ target_sources (cqlite
 
 set_target_properties (cqlite
     PROPERTIES
-        CXX_STANDARD 11
+        CXX_STANDARD 20
         VERSION ${CQLITE_VERSION}
         SOVERSION ${CQLITE_VERSION_MAJOR}
 )

@@ -22,14 +22,14 @@
  * This is free software, and you are welcome to redistribute it
  * under certain conditions.
  */
-#include    <cqlite/database.hpp>
-#include    <gtest/gtest.h>
+#include <cqlite/database.hpp>
 
-#include    <functional>
+#include <gtest/gtest.h>
 
-#include    <cstring>
-#include    <cstdint>
-#include    <tuple>
+#include <cstdint>
+#include <cstring>
+#include <functional>
+#include <tuple>
 
 using namespace cqlite;
 
@@ -42,17 +42,15 @@ namespace {
         void hook (std::int64_t);
     };
 
-    inline void IdWatcher::hook (std::int64_t id)
-    { lastId = id; }
+    inline void IdWatcher::hook (std::int64_t id) { lastId = id; }
 
     Database& createDatabase (Database& db)
     {
-        db <<
-            "CREATE TABLE foo ("
-            "id INTEGER PRIMARY KEY, "
-            "name TEXT, "
-            "created_at TEXT NOT NULL DEFAULT (STRFTIME ('%Y-%m-%dT%H:%M:%fZ'))"
-            ")";
+        db << "CREATE TABLE foo ("
+              "id INTEGER PRIMARY KEY, "
+              "name TEXT, "
+              "created_at TEXT NOT NULL DEFAULT (STRFTIME ('%Y-%m-%dT%H:%M:%fZ'))"
+              ")";
 
         return db;
     }
@@ -71,9 +69,10 @@ namespace {
 
         return db;
     }
-}
+} // namespace
 
-TEST (advanced, hook) {
+TEST (database, hook_gets_called)
+{
     Database db {":memory:"};
     IdWatcher watch;
 
@@ -87,22 +86,19 @@ TEST (advanced, hook) {
     ASSERT_EQ (watch.lastId, 10);
 }
 
-TEST (advanced, blob) {
+TEST (database, can_insert_and_retrieve_blob)
+{
     Database db {":memory:"};
-    db <<
-        "CREATE TABLE foo ("
-        "id INTEGER PRIMARY KEY, "
-        "data BLOB DEFAULT NULL)";
+    db << "CREATE TABLE foo ("
+          "id INTEGER PRIMARY KEY, "
+          "data BLOB DEFAULT NULL)";
 
-    Statement insert = db.prepare (
-            "INSERT INTO foo (data) VALUES (?1)");
+    Statement insert = db.prepare ("INSERT INTO foo (data) VALUES (?1)");
 
     using DataType = std::uint16_t;
-    DataType data [] = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-    };
+    DataType data[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const std::size_t dataSize = sizeof data;
-    const std::size_t dataCount = dataSize / sizeof data [0];
+    const std::size_t dataCount = dataSize / sizeof data[0];
 
     insert << std::make_pair (data, dataSize);
     insert.execute ();
@@ -120,6 +116,6 @@ TEST (advanced, blob) {
     auto resultPtr = reinterpret_cast<const DataType*> (resultData);
 
     for (std::size_t i = 0; i < dataCount; ++i) {
-        ASSERT_EQ (i, resultPtr [i]);
+        ASSERT_EQ (i, resultPtr[i]);
     }
 }
