@@ -20,6 +20,7 @@ target_sources (cqlite
     PRIVATE
         cqlite/code.cpp
         cqlite/database.cpp
+        cqlite/error.cpp
         cqlite/result.cpp
         cqlite/statement.cpp
 )

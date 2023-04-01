@@ -40,10 +40,13 @@ struct sqlite3_stmt;
 
 namespace cqlite {
 
-    class QueryError : public Error
+    class CQLITE_EXPORT QueryError : public Error
     {
+        using Base = Error;
+
       public:
-        using Error::Error;
+        explicit QueryError (const std::string&);
+        explicit QueryError (const char*);
     };
 
     /**

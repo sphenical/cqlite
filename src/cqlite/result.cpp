@@ -33,6 +33,10 @@
 
 namespace cqlite {
 
+    QueryError::QueryError (const std::string& what) : Error {what} {}
+
+    QueryError::QueryError (const char* what) : Error {what} {}
+
     /**
      * Creates a new result from the given sqlite3 statement.
      * The given statement is not managed in any way, it must be assured

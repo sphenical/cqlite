@@ -37,6 +37,10 @@ namespace cqlite {
         using Callback = void (*) (void*, int, char const*, char const*, sqlite3_int64);
     }
 
+    DbError::DbError (const std::string& what) : Error {what} {}
+
+    DbError::DbError (const char* what) : Error {what} {}
+
     /**
      * Opens a database connection on the given file.
      * @param path the path to the sqlite3 database file
