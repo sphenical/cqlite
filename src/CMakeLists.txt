@@ -1,8 +1,8 @@
 cmake_minimum_required (VERSION 3.18)
 project (cqlite-sources)
 
-if (CQLITE_BUILD_SHARED_LIBS)
-    add_library (cqlite SHARED)
+add_library (cqlite)
+if (BUILD_SHARED_LIBS)
     if (WIN32)
         target_compile_definitions (cqlite
             PUBLIC
@@ -11,7 +11,6 @@ if (CQLITE_BUILD_SHARED_LIBS)
 
     endif ()
 else ()
-    add_library (cqlite STATIC)
     set_property (TARGET cqlite
         PROPERTY COMPILE_FLAGS -DCQLITE_STATIC)
 endif ()
@@ -27,13 +26,13 @@ target_sources (cqlite
 
 set_target_properties (cqlite
     PROPERTIES
-        CXX_STANDARD 20
+        CXX_STANDARD 11
         VERSION ${CQLITE_VERSION}
         SOVERSION ${CQLITE_VERSION_MAJOR}
 )
 
 target_link_libraries (cqlite
-    PRIVATE
+    PUBLIC
         SQLite::SQLite3
 )
 
@@ -73,6 +72,7 @@ if (NOT CQLITE_DISABLE_INSTALLS)
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        RUNTIME_DEPENDENCIES
     )
 
     export (EXPORT cqlite-config NAMESPACE cqlite::)
@@ -92,12 +92,6 @@ if (NOT CQLITE_DISABLE_INSTALLS)
         ${CMAKE_CURRENT_BINARY_DIR}/cqlite-config-version.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cqlite
     )
-
-    if (WIN32)
-        install (FILES
-            ${SQLite3_LIBRARY_DLL_LOCATION}
-            DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    endif ()
 
     install (FILES
         ${CQLITE_CONFIG_HEADER_FILE}

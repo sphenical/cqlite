@@ -130,7 +130,7 @@ the parent project. This can be achieved with the following content placed in th
 top-level CMakeLists.txt file:
 
 ```cmake
-set (CQLITE_BUILD_SHARED_LIBS OFF CACHE BOOL "Build the cqlite shared library.")
+set (BUILD_SHARED_LIBS OFF CACHE BOOL "Build the shared library.")
 set (CQLITE_DISABLE_INSTALLS ON CACHE BOOL "Install the cqlite library.")
 add_subdirectory (vendor/cqlite)
 ```
