@@ -44,8 +44,8 @@ pipeline {
                 '''
             }
         }
-        parallel {
-            stages {
+        stage ('Build') {
+            parallel {
                 stage ('Build release') {
                     steps {
                         sh 'cmake --build build'
@@ -58,8 +58,8 @@ pipeline {
                 }
             }
         }
-        parallel {
-            stages {
+        stage ('Checks and docs') {
+            parallel {
                 stage ('Test') {
                     steps {
                         sh 'cmake --build build --target check'
